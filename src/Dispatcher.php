@@ -121,7 +121,7 @@ class Dispatcher implements DispatcherInterface
 
             // if route matched method, check uri
             if ($matchMethod) {
-                $matchPattern = preg_match($uri, $requestUri, $fromUri);
+                $matchPattern = preg_match('!'.$uri.'!', $requestUri, $fromUri);
                 if ($matchPattern) {
                     $args = $fromUri;
                 }
@@ -131,7 +131,7 @@ class Dispatcher implements DispatcherInterface
             // then check any headers
             if ($matchPattern && count($route['headers']) > 0) {
                 foreach ($route['headers'] as $routeHeader => $routeValue) {
-                    if (preg_match($routeValue, $request->getHeader($routeHeader), $fromHeader)) {
+                    if (preg_match('!'.$routeValue.'!', $request->getHeader($routeHeader), $fromHeader)) {
                         $args = array_merge($args, $fromHeader);
                         $matchHeaders = true;
                     }

@@ -29,7 +29,7 @@ Routes define the criteria that a request must match in order for a given action
 
 ### Route Criteria
 
-Routes contain at least two pieces of information: a `uri`, and an `action`. The `uri` is the regular expression used to match the requested URI. The `action` is code that the dispatcher will hand the request off to. Optionally, you can also match based on request method and HTTP headers.
+Routes contain at least two pieces of information: a `uri`, and an `action`. The `uri` is the regular expression (without start and end delimiters) used to match the requested URI. The `action` is code that the dispatcher will hand the request off to. Optionally, you can also match based on request method and HTTP headers.
 
 Routes can be defined individually using `addRoute()`, or as a collection using `addRoutes()`. In each case, both `uri` and `action` must be specified.
 
@@ -75,7 +75,7 @@ As well as one or more HTTP headers using regular expressions.
 
 Regex patterns can be used to capture named parameters. For example, to capture usernames in the URI `/users/joe`, where `joe` can be any username, you could add a route with `uri` set to `#^/users/(?P<username>[a-zA-Z0-9-_])$#`. `?P<username>` defines a named substring match in the regular expression, which is then made available to the action as an argument.
 
-    $dispatcher->addRoute('#^/users/(?P<username>[a-zA-Z0-9-_])$#', function ($username) {
+    $dispatcher->addRoute('^/users/(?P<username>[a-zA-Z0-9-_])$', function ($username) {
         // if the requested URI is /users/joe, then $username will contain 'joe'
     });
 
@@ -86,7 +86,7 @@ One thing to keep in mind is that the name of the argument in the action must ma
     };
 
     $dispatcher->addRoute($uri, $action, $method, array(
-        'Host' => '#^(?P<host>example.com)$#'
+        'Host' => '^(?P<host>example.com)$'
     ));
 
 Actions can be a method on an object or a closure, and can defined like so:
@@ -111,7 +111,7 @@ You can define a 404 handler easily enough by defining the last route in the *ro
 
     $dispatcher->addRoutes([
         ...
-        [ 'uri' => '#^.*$#', 'action' => $error404Action ]
+        [ 'uri' => '^.*$', 'action' => $error404Action ]
     ]);
 
 Actions
@@ -123,12 +123,12 @@ An action defines the code that actually processes the request and generates a r
     $routes = [
         [
             'method' => 'GET',
-            'uri' => '#^/foo/(?P<bar>.*)$#',
+            'uri' => '^/foo/(?P<bar>.*)$',
             'action' => 'MyController:getFooAction'
         ],
         [
             'method' => 'POST',
-            'uri' => '#^/foo',
+            'uri' => '^/foo',
             'action' => 'MyController:postFooAction'
         ]
     ];

@@ -13,7 +13,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     {
         $service = new Dispatcher(new Di());
 
-        $service->addRoute('/^foo$/', function () {
+        $service->addRoute('^/foo$', function () {
             return new Response();
         });
 
@@ -27,7 +27,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         $request->expects($this->once())
             ->method('getUri')
-            ->will($this->returnValue('foo'));
+            ->will($this->returnValue('/foo'));
 
         $response = $service->dispatch($request);
         $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
@@ -50,15 +50,15 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         $request->expects($this->once())
             ->method('getUri')
-            ->will($this->returnValue('foo'));
+            ->will($this->returnValue('/foo'));
 
         $service = new Dispatcher(new Di());
 
         $service->addRoute(
-            '/^foo$/',
+            '^/foo$',
             function () { return new Response(); },
             'GET',
-            array('Host' => '/^example.com$/')
+            array('Host' => '^example.com$')
         );
 
         $response = $service->dispatch($request);
@@ -82,7 +82,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         $request->expects($this->once())
             ->method('getUri')
-            ->will($this->returnValue('foo'));
+            ->will($this->returnValue('/foo'));
 
         $args = [];
         $action = function (RequestInterface $request, $fromUri, $fromHostHeader) use (&$args) {
@@ -95,10 +95,10 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $service = new Dispatcher(new Di());
 
         $service->addRoute(
-            '/^(?P<fromUri>foo)$/',
+            '^/(?P<fromUri>foo)$',
             $action,
             'GET',
-            array('Host' => '/^(?<fromHostHeader>example.com)$/')
+            array('Host' => '^(?<fromHostHeader>example.com)$')
         );
 
         $response = $service->dispatch($request);
@@ -120,13 +120,13 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         $request->expects($this->once())
             ->method('getUri')
-            ->will($this->returnValue('foo'));
+            ->will($this->returnValue('/foo'));
 
         $service = new Dispatcher(new Di());
 
         $service->addRoutes([
-            ['method' => 'GET', 'uri' => '/^foo$/', 'action' => function () { /* do nothing */ }],
-            ['method' => 'GET', 'uri' => '/^foo$/', 'action' => function () { return new Response(); }]
+            ['method' => 'GET', 'uri' => '^/foo$', 'action' => function () { /* do nothing */ }],
+            ['method' => 'GET', 'uri' => '^/foo$', 'action' => function () { return new Response(); }]
         ]);
 
         $response = $service->dispatch($request);
@@ -145,7 +145,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         $requestA->expects($this->once())
             ->method('getUri')
-            ->will($this->returnValue('foo'));
+            ->will($this->returnValue('/foo'));
 
         $requestB = $this->getMockBuilder('MattFerris\HttpRouting\Request')
             ->setMethods(array('getUri', 'getMethod'))
@@ -157,14 +157,14 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         $requestB->expects($this->once())
             ->method('getUri')
-            ->will($this->returnValue('bar'));
+            ->will($this->returnValue('/bar'));
 
         $service = new Dispatcher(new Di());
 
         $foo = false;
         $service->addRoutes([
-            ['uri' => '/^foo$/', 'action' => function () use ($requestB) { return $requestB; }],
-            ['uri' => '/^bar$/', 'action' => function () use (&$foo) { $foo = true; }]
+            ['uri' => '^/foo$', 'action' => function () use ($requestB) { return $requestB; }],
+            ['uri' => '^/bar$', 'action' => function () use (&$foo) { $foo = true; }]
         ]);
 
         $service->dispatch($requestA);
@@ -181,7 +181,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $bundle->expects($this->once())
             ->method('provides')
             ->will($this->returnValue(array(
-                array('method' => 'GET', 'uri' => '#.*#', 'action' => function () {
+                array('method' => 'GET', 'uri' => '.*', 'action' => function () {
                     $response = new Response();
                     return $response->setBody('foo');
                 })
@@ -198,7 +198,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $request->expects($this->once())
             ->method('getUri')
             ->will(
-                $this->returnValue('foo')
+                $this->returnValue('/foo')
             );
 
         $dispatcher = new Dispatcher(new Di());
