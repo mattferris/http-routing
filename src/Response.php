@@ -23,7 +23,7 @@ class Response implements ResponseInterface
     /**
      * @var array
      */
-    protected $body = array();
+    protected $body = '';
 
     /**
      * @param int $code
@@ -58,15 +58,11 @@ class Response implements ResponseInterface
 
     /**
      * @param string $data
-     * @param bool $encode
      * @return ResponseInterface
      */
-    public function setBody($data, $encode = true)
+    public function setBody($data)
     {
-        if ($encode === true) {
-            $body = json_encode($data);
-        }
-        $this->body = $body;
+        $this->body = $data;
         return $this;
     }
 

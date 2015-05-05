@@ -171,7 +171,7 @@ An action defines the code that actually processes the request and generates a r
 
 ### AbstractController
 
-Optionally, your controllers can extend `AbstractController` and utilize some helper methods: `response()` and `redirect()`. These helpers provide shorthand ways of instantiating a `Response`. The returned `Response` objects default to the `application/json` content type.
+Optionally, your controllers can extend `AbstractController` and utilize some helper methods: `response()` and `redirect()`. These helpers provide shorthand ways of instantiating a `Response`.
 
     use MattFerris\HttpRouting\AbstractController;
 
@@ -179,7 +179,8 @@ Optionally, your controllers can extend `AbstractController` and utilize some he
     {
         public function getFooAction()
         {
-            return $this->response('{"foo": "bar"}');
+            // return JSON
+            return $this->response(json_encode('{"foo": "bar"}'));
         }
 
         public function getBarAction()

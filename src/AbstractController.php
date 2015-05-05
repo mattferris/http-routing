@@ -44,14 +44,8 @@ abstract class AbstractController
 
         $response = new Response();
         $response
-            ->setContentType('application/json')
             ->setCode($code)
-            ->setHeader('Location: '.$url)
-            ->setBody(array(
-                'href' => $this->request->getUri(),
-                'code' => $code,
-                'message' => $msg
-            ));
+            ->setHeader('Location: '.$url);
 
         return $response;
     }
@@ -65,7 +59,6 @@ abstract class AbstractController
     {
         $response = new Response();
         $response
-            ->setContentType('application/json')
             ->setCode($code)
             ->setBody($body);
 
