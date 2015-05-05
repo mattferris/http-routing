@@ -1,0 +1,24 @@
+{
+    "name": "mattferris/http-router",
+    "description": "A lightweight, flexible HTTP request router",
+    "license": "BSD-2-Clause",
+    "autoload": {
+        "psr-4": {
+            "MattFerris\\HttpRouting\\": "src/",
+            "MattFerris\\HttpRouting\\Demo\\": "demo/Controllers/"
+        }
+    },
+    "require": {
+        "mattferris/di": "dev-master",
+        "mattferris/events": "dev-master"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.3"
+    },
+    "authors": [
+        {
+            "name": "Matt Ferris",
+            "email": "matt@bueller.ca"
+        }
+    ]
+}
