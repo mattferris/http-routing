@@ -97,14 +97,6 @@ Actions can be a method on an object or a closure, and can defined like so:
     // define a closure action
     $dispatcher->addRoute($uri, function () { ... });
 
-### Fall-Through Routes
-
-*Fall-through routes* are routes which don't return a response, and therefore allow further matching to continue. They can be useful for executing code without terminating the routing process. For example, you could use a *fall-through route* to add request logging.
-
-    $dispatcher->addRoute($uri, function (Request $request) {
-        error_log('received request: '.$request->getUri());
-    });
-
 ### Error 404 Handling
 
 You can define a 404 handler easily enough by defining the last route in the *route stack* with generic criteria, and setting the action to a piece of code that can generate an approriate response.
@@ -125,7 +117,7 @@ You can define a 404 handler easily enough by defining the last route in the *ro
 Actions
 -------
 
-An action defines the code that actually processes the request and generates a response. The only requirement of an action is that it return an instance of `ResponseInterface`.
+An action defines the code that actually processes the request and generates a response. The only requirement of an action is that it return an instance of `ResponseInterface`, an instance of `RequestInterface`, or nothing at all.
 
     // given these routes...
     $routes = [
@@ -197,6 +189,26 @@ Optionally, your controllers can extend `AbstractController` and utilize some he
 
         ...
     }
+
+### Interal Redirects
+
+Using `$this->redirect()` in the example above produces an HTTP 301 response, which the browser then interprets and issues a new request to the specified URL. In some cases, you may want to simply re-evaluate a new request without returning anything to the client. This is possible by returning an instance of `RequestInterface` from the action.
+
+    public function someAction()
+    {
+        return new Request();
+    }
+
+When `Dispatcher` identifies the return value from the action as a new request, it calls `dispatch()` again and passes the new request as an argument. The new request is processed exactly the same as the original.
+
+### Fall-Through Routes
+
+*Fall-through routes* are routes which don't return a response, and therefore allow further matching to continue. They can be useful for executing code without terminating the routing process. For example, you could use a *fall-through route* to add request logging.
+
+    $dispatcher->addRoute($uri, function (Request $request) {
+        error_log('received request: '.$request->getUri());
+    });
+
 
 ### Argument Injection
 
