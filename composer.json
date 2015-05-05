@@ -1,5 +1,5 @@
 {
-    "name": "mattferris/http-router",
+    "name": "mattferris/http-routing",
     "description": "A lightweight, flexible HTTP request router",
     "license": "BSD-2-Clause",
     "autoload": {

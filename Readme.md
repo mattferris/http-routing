@@ -13,7 +13,7 @@ The dispatcher resolves requests by comparing the URI of the passed `Request` ob
 
     $dispatcher = new Dispatcher(new Di());
 
-Calling `dispatch()` routes the request to and action, which in turn returns a response. This response is then returned by `dispatch()`. The response is an instance of `Response`. Unless you want to modify the current request, you can call `dispatch()` without arguments, however you can pass a custom request for processing. To send the response to the client, call `send()` on the returned response.
+Calling `dispatch()` routes the request to an action, which, in turn, returns a response. This response is then returned by `dispatch()`. The response is an instance of `Response`. Unless you want to modify the current request, you can call `dispatch()` without arguments, however you can pass a custom request for processing. To send the response to the client, call `send()` on the returned response.
 
     $response = $dispatcher->dispatch();
     $response->send();
@@ -25,13 +25,13 @@ Or, if you prefer a one-liner:
 Routing
 -------
 
-Routes define the criteria that a request must match in order for a given action to process the request. Routes are evaluated in the order they are added. Multiple actions can process a single request, with processing continuing until an action returns a response. The collection of routes is referred to as a ''route stack''.
+Routes define the criteria that a request must match in order for a given action to process the request. Routes are evaluated in the order they are added. Multiple actions can process a single request, with processing continuing until an action returns a response. The collection of routes is referred to as a *route stack*.
 
 ### Route Criteria
 
-Routes contain at least two pieces of information: a URI, and an action. The URI is the regular expression used to match the requested URI. The action is code that the dispatcher will hand the request off to. Optionally, you can also match based on request method and HTTP headers.
+Routes contain at least two pieces of information: a `uri`, and an `action`. The `uri` is the regular expression used to match the requested URI. The `action` is code that the dispatcher will hand the request off to. Optionally, you can also match based on request method and HTTP headers.
 
-Routes can be defined individually using `addRoute()`, or as a collection using `addRoutes()`. In each case, both pattern and action must be specified.
+Routes can be defined individually using `addRoute()`, or as a collection using `addRoutes()`. In each case, both `uri` and `action` must be specified.
 
     $dispatcher->addRoute($uri, $action);
 
@@ -99,7 +99,7 @@ Actions can be a method on an object or a closure, and can defined like so:
 
 ### Fall-Through Routes
 
-''Fall-through routes'' are routes which don't return a response, and therefore allow further matching to continue. They can be useful for executing code without terminating the routing process. For example, you could use a ''fall-through route'' to add request logging.
+*Fall-through routes* are routes which don't return a response, and therefore allow further matching to continue. They can be useful for executing code without terminating the routing process. For example, you could use a *fall-through route* to add request logging.
 
     $dispatcher->addRoute($uri, function (Request $request) {
         error_log('received request: '.$request->getUri());
@@ -107,7 +107,7 @@ Actions can be a method on an object or a closure, and can defined like so:
 
 ### Error 404 Handling
 
-You can define a 404 handler easily enough by defining the last route in the ''route stack'' with generic criteria, and setting the action to a piece of code that can generate an approriate response.
+You can define a 404 handler easily enough by defining the last route in the *route stack* with generic criteria, and setting the action to a piece of code that can generate an approriate response.
 
     $error404Action = function (Request $request) {
         $response = new Response();
@@ -164,6 +164,8 @@ An action defines the code that actually processes the request and generates a r
             $response
                 ->setContentType('application/json')
                 ->setBody('{"status": "success"}');
+
+            return $response;
         }
     }
 
@@ -208,7 +210,7 @@ As discussed above, you can access the current `Request` via the dependency inje
         ...
     }
 
-The dependency injector automagically injects the `Request` object into the action when it sees an argument named `$request`. This allows you to write controllers that don't extend `AbstractController` and therefore are more decoupled from chickadee.
+The dependency injector automagically injects the `Request` object into the action when it sees an argument named `$request`. This allows you to write controllers that don't extend `AbstractController` and therefore are more decoupled.
 
 For more on dependency injection, checkout [mattferris/di](http://bueller.ca/di).
 
