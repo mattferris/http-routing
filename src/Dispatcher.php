@@ -117,13 +117,19 @@ class Dispatcher implements DispatcherInterface
             $args = array();
 
             $matchMethod = $request->getMethod() === $method;
-            $matchPattern = preg_match($uri, $requestUri, $fromUri);
-            if ($matchPattern) {
-                $args = $fromUri;
+            $matchPattern = $matchHeaders = false;
+
+            // if route matched method, check uri
+            if ($matchMethod) {
+                $matchPattern = preg_match($uri, $requestUri, $fromUri);
+                if ($matchPattern) {
+                    $args = $fromUri;
+                }
             }
 
-            $matchHeaders = false;
-            if (count($route['headers']) > 0) {
+            // if route matched pattern (which assumes it also matched method)
+            // then check any headers
+            if ($matchPattern && count($route['headers']) > 0) {
                 foreach ($route['headers'] as $routeHeader => $routeValue) {
                     if (preg_match($routeValue, $request->getHeader($routeHeader), $fromHeader)) {
                         $args = array_merge($args, $fromHeader);
@@ -136,6 +142,7 @@ class Dispatcher implements DispatcherInterface
                 $matchHeaders = true;
             }
 
+            // if everything matched, call the action
             if ($matchMethod && $matchPattern && $matchHeaders) {
                 $args['request'] = $request;
 
