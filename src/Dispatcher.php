@@ -77,7 +77,7 @@ class Dispatcher implements DispatcherInterface
     {
         foreach ($routes as $route) {
             if (!isset($route['method'])) {
-                $route['method'] = 'get';
+                $route['method'] = 'GET';
             }
             if (!isset($route['headers'])) {
                 $route['headers'] = array();
@@ -145,6 +145,11 @@ class Dispatcher implements DispatcherInterface
                     $response = $this->di->injectMethod($action[0], $action[1], $args);
                 }
                 DomainEvents::dispatch(new DispatchedRequestEvent($request, $route, $args));
+
+                // if we get a request returned, dispatch it
+                if ($response instanceof RequestInterface) {
+                    $response = $this->dispatch($response);
+                }
 
                 if ($response instanceof ResponseInterface) {
                     break;

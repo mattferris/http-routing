@@ -133,6 +133,45 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
     }
 
+    public function testInternalRedirect()
+    {
+        $requestA = $this->getMockBuilder('MattFerris\HttpRouting\Request')
+            ->setMethods(array('getUri', 'getMethod'))
+            ->getMock();
+
+        $requestA->expects($this->exactly(2))
+            ->method('getMethod')
+            ->will($this->returnValue('GET'));
+
+        $requestA->expects($this->once())
+            ->method('getUri')
+            ->will($this->returnValue('foo'));
+
+        $requestB = $this->getMockBuilder('MattFerris\HttpRouting\Request')
+            ->setMethods(array('getUri', 'getMethod'))
+            ->getMock();
+
+        $requestB->expects($this->exactly(2))
+            ->method('getMethod')
+            ->will($this->returnValue('GET'));
+
+        $requestB->expects($this->once())
+            ->method('getUri')
+            ->will($this->returnValue('bar'));
+
+        $service = new Dispatcher(new Di());
+
+        $foo = false;
+        $service->addRoutes([
+            ['uri' => '/^foo$/', 'action' => function () use ($requestB) { return $requestB; }],
+            ['uri' => '/^bar$/', 'action' => function () use (&$foo) { $foo = true; }]
+        ]);
+
+        $service->dispatch($requestA);
+
+        $this->assertTrue($foo);
+    }
+
     public function testBundleRegistration()
     {
         $bundle = $this->getMockBuilder('MattFerris\HttpRouting\BundleInterface')
