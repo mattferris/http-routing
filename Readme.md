@@ -1,6 +1,8 @@
 HttpRouting
 ===========
 
+[![Build Status](https://travis-ci.org/mattferris/http-routing.svg?branch=master)](https://travis-ci.org/mattferris/http-routing)
+
 An HTTP routing library for PHP
 
 Dispatcher
