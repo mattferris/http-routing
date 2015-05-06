@@ -84,7 +84,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
             ->method('getUri')
             ->will($this->returnValue('/foo'));
 
-        $args = [];
+        $args = array();
         $action = function (RequestInterface $request, $fromUri, $fromHostHeader) use (&$args) {
             $args['request'] = $request;
             $args['fromUri'] = $fromUri;
@@ -124,10 +124,10 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         $service = new Dispatcher(new Di());
 
-        $service->addRoutes([
-            ['method' => 'GET', 'uri' => '^/foo$', 'action' => function () { /* do nothing */ }],
-            ['method' => 'GET', 'uri' => '^/foo$', 'action' => function () { return new Response(); }]
-        ]);
+        $service->addRoutes(array(
+            array('method' => 'GET', 'uri' => '^/foo$', 'action' => function () { /* do nothing */ }),
+            array('method' => 'GET', 'uri' => '^/foo$', 'action' => function () { return new Response(); })
+        ));
 
         $response = $service->dispatch($request);
         $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
@@ -162,10 +162,10 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $service = new Dispatcher(new Di());
 
         $foo = false;
-        $service->addRoutes([
-            ['uri' => '^/foo$', 'action' => function () use ($requestB) { return $requestB; }],
-            ['uri' => '^/bar$', 'action' => function () use (&$foo) { $foo = true; }]
-        ]);
+        $service->addRoutes(array(
+            array('uri' => '^/foo$', 'action' => function () use ($requestB) { return $requestB; }),
+            array('uri' => '^/bar$', 'action' => function () use (&$foo) { $foo = true; })
+        ));
 
         $service->dispatch($requestA);
 
