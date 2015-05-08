@@ -181,31 +181,39 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $bundle->expects($this->once())
             ->method('provides')
             ->will($this->returnValue(array(
-                array('method' => 'GET', 'uri' => '.*', 'action' => function () {
-                    $response = new Response();
-                    return $response->setBody('foo');
-                })
+                array('method' => 'GET', 'uri' => 'foo', 'action' => function () {
+                    return new Response();
+                }),
+                array('method' => 'GET', 'uri' => 'bar', 'action' => 'DispatcherTest_Stub:stubAction')
             )));
 
         $request = $this->getMockBuilder('MattFerris\HttpRouting\Request')
             ->setMethods(array('getUri', 'getMethod'))
             ->getMock();
 
-        $request->expects($this->once())
+        $request->expects($this->exactly(3))
             ->method('getMethod')
-            ->will($this->returnValue('GET'));
+            ->willReturn('GET');
 
-        $request->expects($this->once())
+        $request->expects($this->exactly(2))
             ->method('getUri')
-            ->will(
-                $this->returnValue('/foo')
-            );
+            ->will($this->onConsecutiveCalls('foo','bar'));
 
         $dispatcher = new Dispatcher(new Di());
         $dispatcher->register($bundle);
 
         $response = $dispatcher->dispatch($request);
         $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+
+        $response = $dispatcher->dispatch($request);
+        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
     }
 }
 
+class DispatcherTest_Stub
+{
+    static public function stubAction()
+    {
+        return new Response();
+    }
+}
