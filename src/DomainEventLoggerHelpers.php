@@ -8,9 +8,9 @@
 
 namespace MattFerris\HttpRouting;
 
-use MattFerris\Events\AbstractDomainEventLoggerHelpers;
+use MattFerris\Events\AbstractLoggerHelpers;
 
-class DomainEventLoggerHelpers extends AbstractDomainEventLoggerHelpers
+class DomainEventLoggerHelpers extends AbstractLoggerHelpers
 {
     /**
      * @param DispatchedRequestEvent $event
