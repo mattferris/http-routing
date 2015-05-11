@@ -13,30 +13,88 @@ class Request implements RequestInterface
     /**
      * @var array
      */
-    protected $request = array();
+    protected $server = array();
 
     /**
-     * @param array $request
+     * @var array
      */
-    public function __construct(array $request = null)
+    protected $_get = array();
+
+    /**
+     * @var array
+     */
+    protected $_post = array();
+
+    /**
+     * @var array
+     */
+    protected $_cookie = array();
+
+    /**
+     * @param array $server
+     * @param array $get
+     * @param array $post
+     * @param array $cookie
+     */
+    public function __construct(array $server = null, array $get = null, array $post = null, array $cookie = null)
     {
-        if ($request === null) {
-            $request = $_SERVER;
+        if ($server === null) {
+            $server = $_SERVER;
         }
 
-        $this->request = $request;
+        if ($get === null) {
+            $get = $_GET;
+        }
+
+        if ($post === null) {
+            $post = $_POST;
+        }
+
+        if ($cookie === null) {
+            $cookie = $_COOKIE;
+        }
+
+        $this->server = $server;
+        $this->_get = $get;
+        $this->_post = $post;
+        $this->_cookie = $cookie;
+    }
+
+
+    /**
+     * @param string $list
+     * @param bool $keyValue
+     * @return array
+     */
+    protected function parseList($list, $keyValue = false)
+    {
+        // explode and trim
+        $list = array_map(
+            function ($v) { return trim($v); },
+            explode(',', $list)
+        );
+
+        if ($keyValue === true) {
+            $newList = array();
+            foreach ($list as $pair) {
+                $parts = explode('=', $pair);
+                if ($parts[1] === null) {
+                    $parts[1] = true;
+                }
+                $newList[$parts[0]] = $parts[1];
+            }
+            $list = $newList;
+        }
+
+        return $list;
     }
 
     /**
-     * @return string
+     * @return bool
      */
-    public function getScheme()
+    public function isHttps()
     {
-        if (empty($this->request['HTTPS'])) {
-            return 'http';
-        } else {
-            return 'https';
-        }
+        return !empty($this->server['HTTPS']);
     }
 
     /**
@@ -44,25 +102,7 @@ class Request implements RequestInterface
      */
     public function getMethod()
     {
-        return $this->request['REQUEST_METHOD'];
-    }
-
-    /**
-     * @param string $header
-     * @return mixed
-     */
-    public function getHeader($header)
-    {
-        switch ($header) {
-            case 'Accept': return $this->request['HTTP_ACCEPT'];
-            case 'Accept-Charset': return $this->request['HTTP_ACCEPT_CHARSET'];
-            case 'Accept-Encoding': return $this->request['HTTP_ACCEPT_ENCODING'];
-            case 'Accept-Language': return $this->request['HTTP_ACCEPT_LANGUAGE'];
-            case 'Connection': return $this->request['HTTP_CONNECTION'];
-            case 'Host': return $this->request['HTTP_HOST'];
-            case 'User-Agent': return $this->request['HTTP_USER_AGENT'];
-            default: return false;
-        }
+        return $this->server['REQUEST_METHOD'];
     }
 
     /**
@@ -70,7 +110,203 @@ class Request implements RequestInterface
      */
     public function getUri()
     {
-        return $_GET['q'];
+        return $this->server['REQUEST_URI'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getHost()
+    {
+        return $this->server['HTTP_HOST'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getConnection()
+    {
+        return $this->server['HTTP_CONNECTION'];
+    }
+
+    /**
+     * @return array
+     */
+    public function getCacheControl()
+    {
+        $cacheControl = array();
+
+        // check if cache control header was set
+        if (!empty($this->server['HTTP_CACHE_CONTROL'])) {
+
+            // check if header has been parsed
+            if (!is_array($this->server['HTTP_CACHE_CONTROL'])) {
+
+                $cacheControl = $this->parseList($this->server['HTTP_CACHE_CONTROL'], true);
+
+                // replace unparsed value with parsed value
+                $this->server['HTTP_CACHE_CONTROL'] = $cacheControl;
+                
+            } else {
+
+                // use the previously parsed value
+                $cacheControl = $this->server['HTTP_CACHE_CONTROL'];
+
+            }
+        }
+
+        return $cacheControl;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAccept()
+    {
+        $accept = array();
+
+        // check if accept header was set
+        if (!empty($this->server['HTTP_ACCEPT'])) {
+
+            // check if header has been parsed
+            if (!is_array($this->server['HTTP_ACCEPT'])) {
+
+                $accept = $this->parseList($this->server['HTTP_ACCEPT']);
+
+                // replace unparsed value with parsed value
+                $this->server['HTTP_ACCEPT'] = $accept;
+
+            } else {
+
+                // use the previously parsed value
+                $accept = $this->server['HTTP_ACCEPT'];
+
+            }
+        }
+
+        return $accept;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAcceptEncoding()
+    {
+        $accept = array();
+
+        // check if accept header was set
+        if (!empty($this->server['HTTP_ACCEPT_ENCODING'])) {
+
+            // check if header has been parsed
+            if (!is_array($this->server['HTTP_ACCEPT_ENCODING'])) {
+
+                $accept = $this->parseList($this->server['HTTP_ACCEPT_ENCODING']);
+
+                // replace unparsed value with parsed value
+                $this->server['HTTP_ACCEPT_ENCODING'] = $accept;
+
+            } else {
+
+                // use the previously parsed value
+                $accept = $this->server['HTTP_ACCEPT_ENCODING'];
+
+            }
+        }
+
+        return $accept;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAcceptLanguage()
+    {
+        $accept = array();
+
+        // check if accept header was set
+        if (!empty($this->server['HTTP_ACCEPT_LANGUAGE'])) {
+
+            // check if header has been parsed
+            if (!is_array($this->server['HTTP_ACCEPT_LANGUAGE'])) {
+
+                $accept = $this->parseList($this->server['HTTP_ACCEPT_LANGUAGE']);
+
+                // replace unparsed value with parsed value
+                $this->server['HTTP_ACCEPT_LANGUAGE'] = $accept;
+
+            } else {
+
+                // use the previously parsed value
+                $accept = $this->server['HTTP_ACCEPT_LANGUAGE'];
+
+            }
+        }
+
+        return $accept;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUserAgent()
+    {
+        return $this->server['HTTP_USER_AGENT'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getServerName()
+    {
+        return $this->server['SERVER_NAME'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getServerAddr()
+    {
+        return $this->server['SERVER_ADDR'];
+    }
+
+    /**
+     * @return int
+     */
+    public function getServerPort()
+    {
+        return (int)$this->server['SERVER_PORT'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getRemoteAddr()
+    {
+        return $this->server['REMOTE_ADDR'];
+    }
+
+    /**
+     * @return int
+     */
+    public function getRemotePort()
+    {
+        return (int)$this->server['REMOTE_PORT'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getAuthUser()
+    {
+        return $this->server['PHP_AUTH_USER'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getAuthPass()
+    {
+        return $this->server['PHP_AUTH_PASS'];
     }
 
     /**
@@ -78,19 +314,55 @@ class Request implements RequestInterface
      */
     public function getQueryString()
     {
-        return $this->request['QUERY_STRING'];
+        return $this->server['QUERY_STRING'];
     }
 
     /**
-     * @return array
+     * @param string $key
+     * @return mixed
      */
-    public function getAcceptableMimeTypes()
+    public function get($key = null)
     {
-        // split and trim types, then return
-        return array_map(
-            function ($n) { return trim($n); },
-            explode(';', $this->getHeader('Accept'))
-        );
+        $value = null;
+        if ($key !== null && (isset($this->_get[$key]) || array_key_exists($key, $this->_get))) {
+            $value = $this->_get[$key];
+        } elseif ($key === null) {
+            $value = $this->_get;
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param string $key
+     * @return mixed
+     */
+    public function post($key = null)
+    {
+        $value = null;
+        if ($key !== null && (isset($this->_post[$key]) || array_key_exists($key, $this->_post))) {
+            $value = $this->_post[$key];
+        } elseif ($key === null) {
+            $value = $this->_post;
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param string $key
+     * @return mixed
+     */
+    public function cookie($key = null)
+    {
+        $value = null;
+        if ($key !== null && (isset($this->_cookie[$key]) || array_key_exists($key, $this->_cookie))) {
+            $value = $this->_cookie[$key];
+        } elseif ($key === null) {
+            $value = $this->_cookie;
+        }
+
+        return $value;
     }
 }
 
