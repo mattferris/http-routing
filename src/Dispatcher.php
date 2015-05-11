@@ -35,6 +35,7 @@ class Dispatcher implements DispatcherInterface
      * @param mixed $action
      * @param string $httpMethod
      * @param array $httpHeaders
+     * @return $this
      */
     public function addRoute($uri, $action, $httpMethod = 'GET', $httpHeaders = array())
     {
@@ -68,6 +69,8 @@ class Dispatcher implements DispatcherInterface
             'method' => $httpMethod,
             'headers' => $httpHeaders
         );
+
+        return $this;
     }
 
     /**
