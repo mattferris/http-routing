@@ -4,6 +4,7 @@ use MattFerris\HttpRouting\DomainEvent;
 use MattFerris\HttpRouting\DomainEvents;
 use MattFerris\HttpRouting\Dispatcher;
 use MattFerris\HttpRouting\RequestInterface;
+use MattFerris\HttpRouting\Request;
 use MattFerris\HttpRouting\Response;
 use MattFerris\Di\Di;
 
@@ -36,7 +37,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     public function testRequestHeaderMatch()
     {
         $request = $this->getMockBuilder('MattFerris\HttpRouting\Request')
-            ->setMethods(array('getUri', 'getMethod', 'getHeader'))
+            ->setMethods(array('getUri', 'getMethod', 'getHost'))
             ->getMock();
 
         $request->expects($this->once())
@@ -44,13 +45,12 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
             ->will($this->returnValue('GET'));
 
         $request->expects($this->once())
-            ->method('getHeader')
-            ->with('Host')
-            ->will($this->returnValue('example.com'));
+            ->method('getHost')
+            ->willReturn('example.com');
 
         $request->expects($this->once())
             ->method('getUri')
-            ->will($this->returnValue('/foo'));
+            ->willReturn('/foo');
 
         $service = new Dispatcher(new Di());
 
@@ -65,24 +65,42 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
     } 
 
+    /**
+     * @depends testRequestHeaderMatch
+     * @expectedException MattFerris\HttpRouting\InvalidHeaderException
+     */
+    public function testInvalidHeaderInMatch()
+    {
+        $service = new Dispatcher(new Di());
+        $service->addRoute(
+            '^/foo$',
+            function () {},
+            'GET',
+            array('Foo' => '^bar$')
+        );
+        $response = $service->dispatch(new Request(array(
+            'REQUEST_METHOD' => 'GET',
+            'REQUEST_URI' => '/foo'
+        )));
+    }
+
     public function testActionArgumentInjection()
     {
         $request = $this->getMockBuilder('MattFerris\HttpRouting\Request')
-            ->setMethods(array('getUri', 'getMethod', 'getHeader'))
+            ->setMethods(array('getUri', 'getMethod', 'getHost'))
             ->getMock();
 
         $request->expects($this->once())
             ->method('getMethod')
-            ->will($this->returnValue('GET'));
+            ->willReturn('GET');
 
         $request->expects($this->once())
-            ->method('getHeader')
-            ->with('Host')
-            ->will($this->returnValue('example.com'));
+            ->method('getHost')
+            ->willReturn('example.com');
 
         $request->expects($this->once())
             ->method('getUri')
-            ->will($this->returnValue('/foo'));
+            ->willReturn('/foo');
 
         $args = array();
         $action = function (RequestInterface $request, $fromUri, $fromHostHeader) use (&$args) {

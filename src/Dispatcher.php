@@ -131,7 +131,15 @@ class Dispatcher implements DispatcherInterface
             // then check any headers
             if ($matchPattern && count($route['headers']) > 0) {
                 foreach ($route['headers'] as $routeHeader => $routeValue) {
-                    if (preg_match('!'.$routeValue.'!', $request->getHeader($routeHeader), $fromHeader)) {
+
+                    $headerMethod = 'get'.$routeHeader;
+
+                    // throw exception if method doesn't exist
+                    if (!method_exists($request, $headerMethod)) {
+                        throw new InvalidHeaderException($routeHeader);
+                    }
+
+                    if (preg_match('!'.$routeValue.'!', $request->$headerMethod($routeHeader), $fromHeader)) {
                         $args = array_merge($args, $fromHeader);
                         $matchHeaders = true;
                     }
