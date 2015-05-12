@@ -6,7 +6,6 @@ use MattFerris\HttpRouting\Dispatcher;
 use MattFerris\HttpRouting\RequestInterface;
 use MattFerris\HttpRouting\Request;
 use MattFerris\HttpRouting\Response;
-use MattFerris\Di\Di;
 
 class DispatcherTest extends PHPUnit_Framework_TestCase
 {
@@ -17,7 +16,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
             'REQUEST_URI' => '/foo'
         ));
 
-        $dispatcher = new Dispatcher(new Di());
+        $dispatcher = new Dispatcher();
 
         $dispatcher->addRoute('^/foo$', function () {
             return new Response();
@@ -38,7 +37,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
             'HTTP_HOST' => 'example.com'
         ));
 
-        $dispatcher = new Dispatcher(new Di());
+        $dispatcher = new Dispatcher();
 
         $dispatcher->addRoute(
             '^/foo$',
@@ -62,7 +61,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
             'REQUEST_URI' => '/foo'
         ));
 
-        $dispatcher = new Dispatcher(new Di());
+        $dispatcher = new Dispatcher();
         $dispatcher
             ->addRoute('^/foo$', function () {}, 'GET', array('Foo' => '^bar$'))
             ->dispatch($request);
@@ -87,7 +86,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
             return new Response();
         };
 
-        $dispatcher = new Dispatcher(new Di());
+        $dispatcher = new Dispatcher();
 
         $dispatcher->addRoute(
             '^/(?P<fromUri>foo)$',
@@ -113,7 +112,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
             'REQUEST_URI' => '/foo'
         ));
 
-        $dispatcher = new Dispatcher(new Di());
+        $dispatcher = new Dispatcher();
 
         $dispatcher->addRoutes(array(
             array('method' => 'GET', 'uri' => '^/foo$', 'action' => function () { /* do nothing */ }),
@@ -139,7 +138,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
             'REQUEST_URI' => '/bar'
         ));
 
-        $dispatcher = new Dispatcher(new Di());
+        $dispatcher = new Dispatcher();
 
         $foo = false;
         $dispatcher->addRoutes(array(
@@ -181,7 +180,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
             'REQUEST_URI' => 'bar'
         ));
 
-        $dispatcher = new Dispatcher(new Di());
+        $dispatcher = new Dispatcher();
         $dispatcher->register($bundle);
 
         $response = $dispatcher->dispatch($requestA);

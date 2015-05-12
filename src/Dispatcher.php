@@ -9,6 +9,7 @@
 namespace MattFerris\HttpRouting;
 
 use MattFerris\Di\ContainerInterface;
+use MattFerris\Di\Di;
 
 class Dispatcher implements DispatcherInterface
 {
@@ -25,8 +26,12 @@ class Dispatcher implements DispatcherInterface
     /**
      * @param ContainerInterface $di
      */
-    public function __construct(ContainerInterface $di)
+    public function __construct(ContainerInterface $di = null)
     {
+        if ($di === null) {
+            $di = new Di();
+        }
+
         $this->di = $di;
     }
 
