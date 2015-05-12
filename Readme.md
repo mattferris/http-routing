@@ -103,11 +103,7 @@ Actions can be a method on an object or a closure, and can defined like so:
 You can define a 404 handler easily enough by defining the last route in the *route stack* with generic criteria, and setting the action to a piece of code that can generate an approriate response.
 
     $error404Action = function (Request $request) {
-        $response = new Response();
-        $response
-            ->setContentType('text/html')
-            ->setBody('...');
-        return $response;
+        return new Response('...');
     };
 
     $dispatcher->addRoutes([
@@ -141,24 +137,18 @@ An action defines the code that actually processes the request and generates a r
         {
             ...
 
-            $response = new \MattFerris\HttpRouting\Response();
-            $response
-                ->setContentType('application/json')
-                ->setBody('{"bar":"'.$bar.'"}');
-
-            return $response;
+            return new \MattFerris\HttpRouting\Response(
+                '{"bar":"'.$bar.'"}', 200, 'application/json'
+            );
         }
 
         public function postFooAction()
         {
             ...
 
-            $response = new \MattFerris\HttpRouting\Response();
-            $response
-                ->setContentType('application/json')
-                ->setBody('{"status": "success"}');
-
-            return $response;
+            return new \MattFerris\HttpRouting\Response(
+                '{"status": "success"}', 200, 'application/json'
+            );
         }
     }
 
