@@ -26,6 +26,18 @@ class Response implements ResponseInterface
     protected $body = '';
 
     /**
+     * @param mixed $body
+     * @param string $code
+     * @param string $contentType
+     */
+    public function __construct($body = '', $code = 200, $contentType = 'text/html')
+    {
+        $this->body = $body;
+        $this->code = $code;
+        $this->setContentType($contentType);
+    }
+
+    /**
      * @param int $code
      * @return ResponseInterface
      */
@@ -33,6 +45,14 @@ class Response implements ResponseInterface
     {
         $this->code = $code;
         return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCode()
+    {
+        return $this->code;
     }
 
     /**
@@ -47,6 +67,17 @@ class Response implements ResponseInterface
     }
 
     /**
+     * @param string $header
+     * @retur string
+     */
+    public function getHeader($header)
+    {
+        if (isset($this->headers[$header])) {
+            return $this->headers[$header];
+        }
+    }
+
+    /**
      * @param string $type
      * @return ResponseInterface
      */
@@ -57,6 +88,14 @@ class Response implements ResponseInterface
     }
 
     /**
+     * @return string
+     */
+    public function getContentType()
+    {
+        return $this->headers['Content-Type'];
+    }
+
+    /**
      * @param string $data
      * @return ResponseInterface
      */
@@ -64,6 +103,14 @@ class Response implements ResponseInterface
     {
         $this->body = $data;
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBody()
+    {
+        return $this->body;
     }
 
     public function sendHeaders()
