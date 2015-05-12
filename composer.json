@@ -9,8 +9,8 @@
         }
     },
     "require": {
-        "mattferris/di": "dev-master",
-        "mattferris/events": "dev-master"
+        "mattferris/di": "~0.2"
+        "mattferris/events": "~0.2"
     },
     "require-dev": {
         "phpunit/phpunit": "~4.3"
