@@ -47,13 +47,7 @@ class Dispatcher implements DispatcherInterface
 
             if (method_exists($class, $method)) {
 
-                // check if we've already instantiated the object,
-                // if so, then use the existing object
-                if (!isset($this->controllers[$class])) {
-                    $this->controllers[$class] = $this->di->injectConstructor($class, array('di' => '%DI'));
-                }
-
-                $action = array($this->controllers[$class], $method);
+                $action = array($class, $method);
 
             } else {
                 throw new ActionDoesntExistException($action);
@@ -160,7 +154,13 @@ class Dispatcher implements DispatcherInterface
                 if ($action instanceof \Closure) {
                     $response = $this->di->injectFunction($action, $args);
                 } else {
-                    $response = $this->di->injectMethod($action[0], $action[1], $args);
+                    // check if we've already instantiated the object,
+                    // if so, then use the existing object
+                    $class = $action[0];
+                    if (!isset($this->controllers[$class])) {
+                        $this->controllers[$class] = $this->di->injectConstructor($class, array('di' => '%DI'));
+                    }
+                    $response = $this->di->injectMethod($this->controllers[$class], $action[1], $args);
                 }
                 DomainEvents::dispatch(new DispatchedRequestEvent($request, $route, $args));
 
