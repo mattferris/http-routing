@@ -21,6 +21,7 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
         // make string for route
         $route = $event->getRoute();
         $action = $route['action'];
+
         if ($action instanceof \Closure) {
             $action = 'Closure';
         } elseif (is_array($action)) {
@@ -29,7 +30,7 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
                 $method = $action[1];
                 $action = $class.'->'.$method.'()';
             } else {
-                $action = implode('::', $route);
+                $action = implode('::', $action);
             }
         }
 
@@ -46,7 +47,7 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
             }
         }
 
-        return 'api/rest: dispatched request "'.$route['method'].' '.$event->getRequest()->getUri()
+        return 'dispatched request "'.$route['method'].' '.$event->getRequest()->getUri()
             .'" to "'.$action.'" with arguments ('.implode(', ', $args).')';
     }
 
@@ -57,7 +58,7 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
     static public function onExceptionRaisedEvent(ExceptionRaisedEvent $event)
     {
         $e = $event->getException();
-        return 'api/rest: caught exception "'.get_class($e).'"'
+        return 'caught exception "'.get_class($e).'"'
             .' with message "'.$e->getMessage().'" in '.$e->getFile().':'.$e->getLine();
     }
 
@@ -68,7 +69,7 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
     static public function onReceivedRequestEvent(ReceivedRequestEvent $event)
     {
         $req = $event->getRequest();
-        return 'api/rest: received request "'.$req->getMethod().' '.$req->getUri().'"';
+        return 'received request "'.$req->getMethod().' '.$req->getUri().'"';
     }
 
     /**
@@ -77,7 +78,7 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
      */
     static public function onRouteNotFoundEvent(RouteNotFoundEvent $event)
     {
-        return 'api/rest: no route found to dispatch request "'.$event->getRequest()->getUri().'"';
+        return 'no route found to dispatch request "'.$event->getRequest()->getUri().'"';
     }
 }
 
