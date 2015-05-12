@@ -1,7 +1,0 @@
-<IfModule mod_rewrite.c>
-    RewriteEngine on
-    RewriteBase /~matt/public_html/chickadee/demo
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule (.*) index.php?q=$1 [L,QSA]
-</IfModule>
