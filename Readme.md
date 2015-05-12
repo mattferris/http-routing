@@ -8,12 +8,11 @@ An HTTP routing library for PHP
 Dispatcher
 ----------
 
-The dispatcher resolves requests by comparing the URI of the passed `Request` object against it's list of routes. `Dispatcher` expects an object implementing `MattFerris\Di\ContainerInterface` at instantiation which it users to inject dependencies into the route actions.
+The dispatcher resolves requests by comparing the URI of the passed `Request` object against it's list of routes.
 
     use MattFerris\HttpRouting\Dispatcher;
-    use MattFerris\Di\Di;
 
-    $dispatcher = new Dispatcher(new Di());
+    $dispatcher = new Dispatcher();
 
 Calling `dispatch()` routes the request to an action, which, in turn, returns a response. This response is then returned by `dispatch()`. The response is an instance of `Response`. Unless you want to modify the current request, you can call `dispatch()` without arguments, however you can pass a custom request for processing. To send the response to the client, call `send()` on the returned response.
 
@@ -161,35 +160,6 @@ An action defines the code that actually processes the request and generates a r
 
             return $response;
         }
-    }
-
-### AbstractController
-
-Optionally, your controllers can extend `AbstractController` and utilize some helper methods: `response()` and `redirect()`. These helpers provide shorthand ways of instantiating a `Response`.
-
-    use MattFerris\HttpRouting\AbstractController;
-
-    class MyController extends AbstractController
-    {
-        public function getFooAction()
-        {
-            // return JSON
-            return $this->response(json_encode('{"foo": "bar"}'));
-        }
-
-        public function getBarAction()
-        {
-            return $this->redirect('/another/url');
-        }
-    }
-
-`AbstractController` also provides a reference to `MattFerris\Di\Di` which allows you to pull in references to services or other objects within your application. For example, the `Request` object for the current request can be retrieved vi `$this->di->get('Request')`.
-
-    public function getFooAction()
-    {
-        $request = $this->di->get('Request');
-
-        ...
     }
 
 ### Interal Redirects
