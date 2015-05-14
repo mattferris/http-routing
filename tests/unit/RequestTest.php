@@ -38,6 +38,10 @@ class RequestTest extends PHPUnit_Framework_TestCase
             // $_COOKIE
             array(
                 'bling' => 'blang'
+            ),
+            // headers
+            array(
+                'Authorization' => 'Bearer 1234'
             )
         );
 
@@ -62,6 +66,14 @@ class RequestTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($request->get('foo'), 'bar');
         $this->assertEquals($request->post('blah'), 'bleh');
         $this->assertEquals($request->cookie('bling'), 'blang');
+        $this->assertEquals($request->getHeader('Authorization'), 'Bearer 1234');
+    }
+
+    public function testSetGetAttributes()
+    {
+        $request = new Request();
+        $request->setAttribute('foo', 'bar');
+        $this->assertEquals($request->getAttribute('foo'), 'bar');
     }
 }
 

@@ -31,12 +31,23 @@ class Request implements RequestInterface
     protected $_cookie = array();
 
     /**
+     * @var array
+     */
+    protected $headers = array();
+
+    /**
+     * @var array
+     */
+    protected $attributes = array();
+
+    /**
      * @param array $server
      * @param array $get
      * @param array $post
      * @param array $cookie
+     * @param array $headers
      */
-    public function __construct(array $server = null, array $get = null, array $post = null, array $cookie = null)
+    public function __construct(array $server = null, array $get = null, array $post = null, array $cookie = null, array $headers = null)
     {
         if ($server === null) {
             $server = $_SERVER;
@@ -54,10 +65,19 @@ class Request implements RequestInterface
             $cookie = $_COOKIE;
         }
 
+        if ($headers === null) {
+            if (function_exists('getallheaders')) {
+                $headers = getallheaders();
+            } else {
+                $headers = array();
+            }
+        }
+
         $this->server = $server;
         $this->_get = $get;
         $this->_post = $post;
         $this->_cookie = $cookie;
+        $this->headers = $headers;
     }
 
 
@@ -362,6 +382,43 @@ class Request implements RequestInterface
             $value = $this->_cookie;
         }
 
+        return $value;
+    }
+
+    /**
+     * @param string $header
+     * @return string
+     */
+    public function getHeader($header)
+    {
+        $value = null;
+        if (is_string($header) && (isset($this->headers[$header]) || array_key_exists($header, $this->headers))) {
+            $value = $this->headers[$header];
+        }
+        return $value;
+    }
+
+    /**
+     * @param string $key
+     * @param mixed $value
+     */
+    public function setAttribute($key, $value)
+    {
+        if (!is_string($key) || empty($key)) {
+            throw new \InvalidArgumentException('$key expects non-empty string');
+        }
+        $this->attributes[$key] = $value;
+    }
+
+    /**
+     * @param string $key
+     */
+    public function getAttribute($key)
+    {
+        $value = null;
+        if (isset($this->attributes[$key]) || array_key_exists($key, $this->attributes)) {
+            $value = $this->attributes[$key];
+        }
         return $value;
     }
 }
