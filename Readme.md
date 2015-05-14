@@ -153,9 +153,9 @@ An action defines the code that actually processes the request and generates a r
         }
     }
 
-### Interal Redirects
+### Internal Redirects
 
-Using `$this->redirect()` in the example above produces an HTTP 301 response, which the browser then interprets and issues a new request to the specified URL. In some cases, you may want to simply re-evaluate a new request without returning anything to the client. This is possible by returning an instance of `RequestInterface` from the action.
+You can redirect a client with an HTTP 301 response, which the browser then interprets and issues a new request to the specified URL. In some cases, you may want to simply re-evaluate a new request without returning anything to the client. This is possible by returning an instance of `RequestInterface` from the action.
 
     public function someAction()
     {
@@ -172,6 +172,21 @@ When `Dispatcher` identifies the return value from the action as a new request, 
         error_log('received request: '.$request->getUri());
     });
 
+### Request Attributes
+
+When using internal redirects or *fall-through routes*, it can be useful to pass along information from one action to another. This can be done by setting attributes on the request object using `setAttribute()`.
+
+    public function getFooAction(RequestInterface $request)
+    {
+        $request->setAttribute('bar', 'baz');
+    }
+
+Other actions can then access this information via `getAttribute()`.
+
+    public function anotherAction(RequestInterface $request)
+    {
+        $bar = $request->getAttribute('bar');
+    }
 
 ### Argument Injection
 
