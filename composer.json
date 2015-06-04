@@ -9,7 +9,7 @@
         }
     },
     "require": {
-        "mattferris/di": "~0.2",
+        "mattferris/di": "~0.3",
         "mattferris/events": "~0.2"
     },
     "require-dev": {
