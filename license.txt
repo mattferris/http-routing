@@ -1,4 +1,4 @@
-http-router
+HttpRouter
 
 Copyright (c) 2015, Matt Ferris
 All rights reserved.
