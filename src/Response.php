@@ -1,9 +1,15 @@
 <?php
 
 /**
+ * HttpRouting - An HTTP routing dispatcher
+ * www.bueler.ca/http-routing
+ *
  * Response.php
- * Copyright (c) 2015
+ * @copyright Copyright (c) 2015
  * @author Matt Ferris <matt@bueller.ca>
+ *
+ * Licensed under BSD 2-clause license
+ * www.bueller.ca/http-routing/license
  */
 
 namespace MattFerris\HttpRouting;
@@ -11,24 +17,24 @@ namespace MattFerris\HttpRouting;
 class Response implements ResponseInterface
 {
     /**
-     * @var int
+     * @var int The HTTP status code of the response
      */
     protected $code = 200;
 
     /**
-     * @var array
+     * @var array The HTTP headers to send with the response
      */
     protected $headers = array();
 
     /**
-     * @var array
+     * @var string The body of the response
      */
     protected $body = '';
 
     /**
-     * @param mixed $body
-     * @param string $code
-     * @param string $contentType
+     * @param mixed $body The body of the response
+     * @param string $code The HTTP code of the response
+     * @param string $contentType The value of the Content-type header
      */
     public function __construct($body = '', $code = 200, $contentType = 'text/html')
     {
@@ -38,8 +44,10 @@ class Response implements ResponseInterface
     }
 
     /**
-     * @param int $code
-     * @return ResponseInterface
+     * Set the HTTP status code
+     *
+     * @param int $code The HTTP status code
+     * @return self
      */
     public function setCode($code)
     {
@@ -48,7 +56,9 @@ class Response implements ResponseInterface
     }
 
     /**
-     * @return int
+     * Get the HTTP status code of the response
+     *
+     * @return int The HTTP status code
      */
     public function getCode()
     {
@@ -56,9 +66,11 @@ class Response implements ResponseInterface
     }
 
     /**
-     * @param string $header
-     * @param string $value
-     * @return ResponseInterface
+     * Set the value of the specified header
+     *
+     * @param string $header The name of the header to set
+     * @param string $value The value of the header
+     * @return self
      */
     public function setHeader($header, $value)
     {
@@ -67,8 +79,10 @@ class Response implements ResponseInterface
     }
 
     /**
-     * @param string $header
-     * @retur string
+     * Get the value of the specified header
+     *
+     * @param string $header The name of the header to get
+     * @return string The value of the header
      */
     public function getHeader($header)
     {
@@ -78,8 +92,10 @@ class Response implements ResponseInterface
     }
 
     /**
-     * @param string $type
-     * @return ResponseInterface
+     * Set the value of the Content-Type header
+     *
+     * @param string $type The value to set Content-Type header to
+     * @return self
      */
     public function setContentType($type)
     {
@@ -88,7 +104,9 @@ class Response implements ResponseInterface
     }
 
     /**
-     * @return string
+     * Get the value of the Content-Type header
+     *
+     * @return string The value of the Content-Type header
      */
     public function getContentType()
     {
@@ -96,8 +114,10 @@ class Response implements ResponseInterface
     }
 
     /**
-     * @param string $data
-     * @return ResponseInterface
+     * Set the body of the response
+     *
+     * @param string $data The body value
+     * @return self
      */
     public function setBody($data)
     {
@@ -106,13 +126,20 @@ class Response implements ResponseInterface
     }
 
     /**
-     * @return string
+     * Get the response body
+     *
+     * @return string The response body
      */
     public function getBody()
     {
         return $this->body;
     }
 
+    /**
+     * Send the response headers
+     *
+     * @return self
+     */
     public function sendHeaders()
     {
         http_response_code($this->code);
@@ -122,6 +149,12 @@ class Response implements ResponseInterface
         return $this;
     }
 
+    /**
+     * Send the response body using echo() and sending headers using
+     * sendHeaders()
+     *
+     * @see sendHeaders()
+     */
     public function send()
     {
         $this->sendHeaders();
@@ -129,7 +162,9 @@ class Response implements ResponseInterface
     }
 
     /**
-     * @param mixed $data
+     * Send the response body as a stream
+     *
+     * @param mixed $data The data to send
      */
     public function stream($data)
     {

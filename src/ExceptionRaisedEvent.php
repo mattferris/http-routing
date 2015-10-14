@@ -1,9 +1,15 @@
 <?php
 
 /**
+ * HttpRouting - An HTTP routing dispatcher
+ * www.bueller.ca/http-routing
+ *
  * ExceptionRaisedEvent.php
- * Copyright (c) 2015
+ * @copyright Copyright (c) 2015
  * @author Matt Ferris <matt@bueller.ca>
+ *
+ * Licensed under BSD 2-clause license
+ * www.bueller.ca/http-routing/license
  */
 
 namespace MattFerris\HttpRouting;
@@ -11,12 +17,12 @@ namespace MattFerris\HttpRouting;
 class ExceptionRaisedEvent extends DomainEvent
 {
     /**
-     * @var \Exception
+     * @var \Exception The raised exception
      */
     protected $exception;
 
     /**
-     * @param \Exception $exception
+     * @param \Exception $exception The raised exception
      */
     public function __construct(\Exception $exception)
     {
@@ -24,7 +30,9 @@ class ExceptionRaisedEvent extends DomainEvent
     }
 
     /**
-     * @return \Exception
+     * Return the raised exception
+     *
+     * @return \Exception The raised exception
      */
     public function getException()
     {

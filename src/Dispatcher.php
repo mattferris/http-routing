@@ -1,9 +1,15 @@
 <?php
 
 /**
+ * HttpRouting - An HTTP routing dispatcher
+ * www.bueller.ca/http-routing
+ *
  * Dispatcher.php
- * Copyright (c) 2015
+ * @copyright Copyright (c) 2015
  * @author Matt Ferris <matt@bueller.ca>
+ *
+ * Licensed under BSD 2-clause license
+ * www.bueller.ca/http-routing/license
  */
 
 namespace MattFerris\HttpRouting;
@@ -14,17 +20,17 @@ use MattFerris\Di\Di;
 class Dispatcher implements DispatcherInterface
 {
     /**
-     * @var array
+     * @var array The list of routes added to the dispatcher
      */
     protected $routes = array();
 
     /**
-     * @var ContainerInterface
+     * @var \MattFerris\Di\ContainerInterface An instance of a DI container
      */
     protected $di;
 
     /**
-     * @param ContainerInterface $di
+     * @param \MattFerris\Di\ContainerInterface $di An instance of a DI container
      */
     public function __construct(ContainerInterface $di = null)
     {
@@ -36,11 +42,15 @@ class Dispatcher implements DispatcherInterface
     }
 
     /**
-     * @param string $uri
-     * @param mixed $action
-     * @param string $httpMethod
-     * @param array $httpHeaders
-     * @return $this
+     * Add a route to the dispatcher
+     *
+     * @param string $uri The URI to match
+     * @param mixed $action The action to dispatch the request to
+     * @param string $httpMethod The HTTP method to match
+     * @param array $httpHeaders Any HTTP headers to match
+     * @return self
+     * @throws \MattFerris\HttpRouting\ActionDoesntExistException The action
+     *     doesn't exist or isn't callable
      */
     public function addRoute($uri, $action, $httpMethod = 'GET', $httpHeaders = array())
     {
@@ -73,7 +83,11 @@ class Dispatcher implements DispatcherInterface
     }
 
     /**
-     * @param array $routes
+     * Add multiple routes to the dispatcher by calling addRoute() for each
+     * route in $routes
+     *
+     * @see addRoute()
+     * @param array $routes An array of routes to add
      */
     public function addRoutes(array $routes)
     {
@@ -89,7 +103,11 @@ class Dispatcher implements DispatcherInterface
     }
 
     /**
-     * @param BundleInterface
+     * Register a routing bundle, calling provides() on the bundle to return
+     * all the routes in the bundle. Add the routes via addRoutes().
+     *
+     * @see addRoutes()
+     * @param \MattFerris\HttpRouting\BundleInterface $bundle The bundle to register
      */
     public function register(BundleInterface $bundle)
     {
@@ -97,7 +115,17 @@ class Dispatcher implements DispatcherInterface
     }
 
     /**
-     * @param RequestInterface $request
+     * Attempt to match the passed request to a route, calling the action of
+     * the matched route. If the route's action returns a Response, stop matching
+     * routes and return the response. If a Request is returned, start matching
+     * all over again with the new request. If nothing is returned, continue
+     * matching.
+     *
+     * @param \MattFerris\HttpRouting\RequestInterface $request The request to match
+     * @return \MattFerris\HttpRouting\Response|null The response from the
+     *     matched action or null if no route matched
+     * @throws \MattFerris\HttpRouting\InvalidHeaderException A route defined an
+     *     invalid header name to match
      */
     public function dispatch(RequestInterface $request = null)
     {
