@@ -105,6 +105,6 @@ interface DispatcherInterface
      *     returned by the last-called action, or null if no response returned or
      *     route was matched
      */
-    public function dispatch(RequestInterface $request);
+    public function dispatch(RequestInterface $request = null);
 }
 

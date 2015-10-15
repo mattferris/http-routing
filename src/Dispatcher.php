@@ -183,9 +183,15 @@ class Dispatcher implements DispatcherInterface
      *     returned by the last-called action, or null if no response returned or
      *     route was matched
      */
-    public function dispatch(RequestInterface $request)
+    public function dispatch(RequestInterface $request = null)
     {
+        if ($request === null) {
+            $request = new Request();
+        }
+
         $response = null;
+
+        DomainEvents::dispatch(new ReceivedRequestEvent($request));
 
         for ($i = 0; $i<count($this->routes); $i++) {
             $route = $this->routes[$i];
