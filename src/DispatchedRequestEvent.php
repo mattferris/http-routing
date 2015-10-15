@@ -17,7 +17,8 @@ namespace MattFerris\HttpRouting;
 class DispatchedRequestEvent extends AbstractRequestEvent
 {
     /**
-     * @var mixed The route the event was dispatched for
+     * @var \MattFerris\HttpRouting\RouteInterface The route the event was
+     *     dispatched for
      */
     protected $route;
 
@@ -29,10 +30,11 @@ class DispatchedRequestEvent extends AbstractRequestEvent
     /**
      * @param \MattFerris\HttpRouting\RequestInterface $request The request the
      *     event was dispatched for
-     * @param mixed $route The route that the request matched
+     * @param \MattFerris\HttpRouting\RouteInterface $route The route that the
+     *     request matched
      * @param array $args Any extra arguments passed to the event
      */
-    public function __construct(RequestInterface $request, $route, array $args)
+    public function __construct(RequestInterface $request, RouteInterface $route, array $args)
     {
         $this->route = $route;
         $this->args = $args;
@@ -40,7 +42,7 @@ class DispatchedRequestEvent extends AbstractRequestEvent
     }
 
     /**
-     * @return mixed Return the route for the event
+     * @return \MattFerris\HttpRouting\RouteInterface The route for the event
      */
     public function getRoute()
     {

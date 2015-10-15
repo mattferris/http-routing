@@ -8,58 +8,103 @@
  * @copyright Copyright (c) 2015
  * @author Matt Ferris <matt@bueller.ca>
  *
- * Licensed under BSD 2-clause license
+ * Licensed under BS 2-clause license
  * www.bueller.ca/http-routing/license
  */
 
-namespace MattFerris\HttpRouting;
+namespace MattFerris\HttpRouting; 
 
 interface DispatcherInterface
 {
     /**
-     * Add a route to the dispatcher
+     * Add a route object to the dispatcher
      *
-     * @param string $uri The URI to match
-     * @param mixed $action The action to dispatch the request to
-     * @param string $httpMethod The HTTP method to match
-     * @param array $httpHeaders Any HTTP headers to match
+     * @param \MattFerris\HttpRouting\RouteInterface $route The route to add
      * @return self
-     * @throws \MattFerris\HttpRouting\ActionDoesntExistException The action
-     *     doesn't exist or isn't callable
      */
-    public function addRoute($uri, $action, $httpMethod = 'get', $httpHeaders = array());
+    public function add(RouteInterface $route);
 
     /**
-     * Add multiple routes to the dispatcher by callind addRoute() for each
-     * route in $routes
+     * Insert a route object at a specific array index
      *
-     * @see addRoute()
-     * @param array $routes An array of routes to add
+     * @param \MattFerris\HttpRouting\RouteInterface $route The route to add
+     * @param int $position The array index to insert the route in
+     * @return self
+     * @throws \InvalidArgumentException If $position doesn't exist
      */
-    public function addRoutes(array $routes);
+    public function insert(RouteInterface $route, $position);
+
+    /**
+     * Add a route by supplying all the parameters
+     *
+     * @param string $method The HTTP method to match
+     * @param string $uri The URI to match
+     * @param string[string] $headers Any HTTP headers to match
+     * @param callable $action The action to dispatch the request to
+     * @return self
+     */
+    public function route($method, $uri, array $headers, callable $action);
+
+    /**
+     * Add a route to match any HTTP method
+     *
+     * @param string $uri The URI to match
+     * @param callable $action The action to dispatch the request to
+     * @param string[string] $headers Any HTTP headers to match
+     * @return self
+     */
+    public function any($uri, callable $action, array $headers = []);
+
+    /**
+     * Add a route to match an HTTP GET request
+     *
+     * @param string $uri The URI to match
+     * @param callable $action The action to dispatch the request to
+     * @param string[string] $headers Any HTTP headers to match
+     * @return self
+     */
+    public function get($uri, callable $action, array $headers = []);
+
+    /**
+     * Add a route to match an HTTP POST request
+     *
+     * @param string $uri The URI to match
+     * @param callable $action The action to dispatch the request to
+     * @param string[string] $headers Any HTTP headers to match
+     * @return self
+     */
+    public function post($uri, callable $action, array $headers = []);
+
+    /**
+     * Add a route to match an HTTP PUT request
+     *
+     * @param string $uri The URI to match
+     * @param callable $action The action to dispatch the request to
+     * @param string[string] $headers Any HTTP headers to match
+     * @return self
+     */
+    public function put($uri, callable $action, array $headers = []);
 
     /**
      * Register a routing bundle, callind provdes() on the bundle to return
      * all the routes in the bundle. Add the routes via addRoutes().
      *
-     * @see addRoutes()
      * @param \MattFerris\HttpRouting\BundleInterface $bundle The bundle to register
+     * @return self
+     * @throws \MattFerris\HttpRouting\InvalidRouteCriteriaException If the
+     *    criteria for a specified route is invalid or missing
      */
     public function register(BundleInterface $bundle);
 
     /**
-     * Attempt to match the passed request to a route, calling the action of
-     * the matched route. If the route's action returns a Response, stop matching
-     * routes and return the response. If a Request is returned, start matching
-     * all over again with the new request. If nothing is returned, continue
-     * matching.
-     *
-     * @param \MattFerris\HttpRouting\RequestInterface $request The request to match
-     * @return \MattFerris\HttpRouting\Response The response from the matched action
-     * @return null The request didn't match any routes
-     * @throws \MattFerris\HttpRouting\InvalidHeaderException A route defined an
-     *     invalid header name to match
+     * Find a route that matches the HTTP request and then dispatch to request
+     * to the route's defined action
+     * 
+     * @param \MattFerris\HttpRouting\RequestInterface $request The incoming request
+     * @return \MattFerris\HttpRouting\ResponseInterface|null The response
+     *     returned by the last-called action, or null if no response returned or
+     *     route was matched
      */
-    public function dispatch(RequestInterface $request = null);
+    public function dispatch(RequestInterface $request);
 }
 

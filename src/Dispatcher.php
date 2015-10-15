@@ -8,205 +8,243 @@
  * @copyright Copyright (c) 2015
  * @author Matt Ferris <matt@bueller.ca>
  *
- * Licensed under BSD 2-clause license
+ * Licensed under BS 2-clause license
  * www.bueller.ca/http-routing/license
  */
 
-namespace MattFerris\HttpRouting;
-
-use MattFerris\Di\ContainerInterface;
-use MattFerris\Di\Di;
+namespace MattFerris\HttpRouting; 
 
 class Dispatcher implements DispatcherInterface
 {
     /**
-     * @var array The list of routes added to the dispatcher
+     * @var \MattFerris\HttpRouting\RouteInterface[] Routes added to the dispatcher
      */
-    protected $routes = array();
+    protected $routes = [];
 
     /**
-     * @var \MattFerris\Di\ContainerInterface An instance of a DI container
+     * @var string The class name of the default route type
+     */
+    protected $defaultRouteType = '\\MattFerris\\HttpRouting\\RegexRoute';
+
+    /**
+     * @var \MattFerris\Di\ContainerInterface The dependency injector instance
      */
     protected $di;
 
     /**
-     * @param \MattFerris\Di\ContainerInterface $di An instance of a DI container
+     * @param \MattFerris\Di\ContainerInterface $di A DI instance
      */
-    public function __construct(ContainerInterface $di = null)
+    public function __construct(\MattFerris\Di\ContainerInterface $di = null)
     {
         if ($di === null) {
-            $di = new Di();
+            $di = new \MattFerris\Di\Di();
         }
-
         $this->di = $di;
     }
 
     /**
-     * Add a route to the dispatcher
+     * Add a route object to the dispatcher
+     *
+     * @param \MattFerris\HttpRouting\RouteInterface $route The route to add
+     * @return self
+     */
+    public function add(RouteInterface $route)
+    {
+        $this->routes[] = $route;
+        return $this;
+    }
+
+    /**
+     * Insert a route object at a specific array index
+     *
+     * @param \MattFerris\HttpRouting\RouteInterface $route The route to add
+     * @param int $position The array index to insert the route in
+     * @return self
+     * @throws \InvalidArgumentException If $position doesn't exist
+     */
+    public function insert(RouteInterface $route, $position)
+    {
+        if (!is_int($position) || $position < 0 || $position > count($position)) {
+            throw new \InvalidArgumentExcetion('$position out of range');
+        }
+        array_splice($this->routes, $position, 0, [$route]);
+        return $this;
+    }
+
+    /**
+     * Add a route by supplying all the parameters
+     *
+     * @param string $method The HTTP method to match
+     * @param string $uri The URI to match
+     * @param string[string] $headers Any HTTP headers to match
+     * @param callable $action The action to dispatch the request to
+     * @return self
+     */
+    public function route($method, $uri, array $headers, callable $action)
+    {
+        $class = $this->defaultRouteType;
+        return $this->add(new $class($uri, $action, $method, $headers));
+    }
+
+    /**
+     * Add a route to match any HTTP method
      *
      * @param string $uri The URI to match
-     * @param mixed $action The action to dispatch the request to
-     * @param string $httpMethod The HTTP method to match
-     * @param array $httpHeaders Any HTTP headers to match
+     * @param callable $action The action to dispatch the request to
+     * @param string[string] $headers Any HTTP headers to match
      * @return self
-     * @throws \MattFerris\HttpRouting\ActionDoesntExistException The action
-     *     doesn't exist or isn't callable
      */
-    public function addRoute($uri, $action, $httpMethod = 'GET', $httpHeaders = array())
+    public function any($uri, callable $action, array $headers = [])
     {
-        if (is_string($action) && strpos($action, '::') === false && strpos($action, ':') !== false) {
+        return $this->route(null, $uri, $headers, $action);
+    }
 
-            // if class and method exist, we can use an instatiated
-            // object to handle the requests
-            list($class, $method) = explode(':', $action);
+    /**
+     * Add a route to match an HTTP GET request
+     *
+     * @param string $uri The URI to match
+     * @param callable $action The action to dispatch the request to
+     * @param string[string] $headers Any HTTP headers to match
+     * @return self
+     */
+    public function get($uri, callable $action, array $headers = [])
+    {
+        return $this->route('GET', $uri, $headers, $action);
+    }
 
-            if (method_exists($class, $method)) {
+    /**
+     * Add a route to match an HTTP POST request
+     *
+     * @param string $uri The URI to match
+     * @param callable $action The action to dispatch the request to
+     * @param string[string] $headers Any HTTP headers to match
+     * @return self
+     */
+    public function post($uri, callable $action, array $headers = [])
+    {
+        return $this->route('POST', $uri, $headers, $action);
+    }
 
-                $action = array($class, $method);
+    /**
+     * Add a route to match an HTTP PUT request
+     *
+     * @param string $uri The URI to match
+     * @param callable $action The action to dispatch the request to
+     * @param string[string] $headers Any HTTP headers to match
+     * @return self
+     */
+    public function put($uri, callable $action, array $headers = [])
+    {
+        return $this->route('PUT', $uri, $headers, $action);
+    }
 
-            } else {
-                throw new ActionDoesntExistException($action);
+    /**
+     * Register a routing bundle, callind provdes() on the bundle to return
+     * all the routes in the bundle. Add the routes via addRoutes().
+     *
+     * @param \MattFerris\HttpRouting\BundleInterface $bundle The bundle to register
+     * @return self
+     * @throws \MattFerris\HttpRouting\InvalidRouteCriteriaException If the
+     *    criteria for a specified route is invalid or missing
+     */
+    public function register(BundleInterface $bundle)
+    {
+        foreach ($bundle->provides() as $criteria) {
+            if (!isset($criteria['uri'])) {
+                throw InvalidRouteCriteriaException('missing URI');
             }
 
-        } elseif (!is_callable($action)) {
-            throw new ActionDoesntExistException($action);
-        }
+            if (!isset($criteria['action'])) {
+                throw InvalidRouteCriteriaException('missing action');
+            }
 
-        $this->routes[] = array(
-            'uri' => $uri,
-            'action' => $action,
-            'method' => $httpMethod,
-            'headers' => $httpHeaders
-        );
+            if (!isset($criteria['method'])) {
+                $criteria['method'] = null;
+            }
+
+            if (!isset($criteria['headers'])) {
+                $criteria['headers'] = [];
+            } elseif (!is_array($criteria['headers'])) {
+                throw InvalidRouteCriteriaException('headers must be an array');
+            }
+
+            $this->route($criteria['method'], $criteria['uri'], $criteria['headers'], $criteria['action']);
+        }
 
         return $this;
     }
 
     /**
-     * Add multiple routes to the dispatcher by calling addRoute() for each
-     * route in $routes
-     *
-     * @see addRoute()
-     * @param array $routes An array of routes to add
+     * Find a route that matches the HTTP request and then dispatch to request
+     * to the route's defined action
+     * 
+     * @param \MattFerris\HttpRouting\RequestInterface $request The incoming request
+     * @return \MattFerris\HttpRouting\ResponseInterface|null The response
+     *     returned by the last-called action, or null if no response returned or
+     *     route was matched
      */
-    public function addRoutes(array $routes)
+    public function dispatch(RequestInterface $request)
     {
-        foreach ($routes as $route) {
-            if (!isset($route['method'])) {
-                $route['method'] = 'GET';
-            }
-            if (!isset($route['headers'])) {
-                $route['headers'] = array();
-            }
-            $this->addRoute($route['uri'], $route['action'], $route['method'], $route['headers']);
-        }
-    }
-
-    /**
-     * Register a routing bundle, calling provides() on the bundle to return
-     * all the routes in the bundle. Add the routes via addRoutes().
-     *
-     * @see addRoutes()
-     * @param \MattFerris\HttpRouting\BundleInterface $bundle The bundle to register
-     */
-    public function register(BundleInterface $bundle)
-    {
-        $this->addRoutes($bundle->provides());
-    }
-
-    /**
-     * Attempt to match the passed request to a route, calling the action of
-     * the matched route. If the route's action returns a Response, stop matching
-     * routes and return the response. If a Request is returned, start matching
-     * all over again with the new request. If nothing is returned, continue
-     * matching.
-     *
-     * @param \MattFerris\HttpRouting\RequestInterface $request The request to match
-     * @return \MattFerris\HttpRouting\Response|null The response from the
-     *     matched action or null if no route matched
-     * @throws \MattFerris\HttpRouting\InvalidHeaderException A route defined an
-     *     invalid header name to match
-     */
-    public function dispatch(RequestInterface $request = null)
-    {
-        if ($request === null) {
-            $request = new Request();
-        }
-
         $response = null;
-        $requestUri = $request->getUri();
 
-        DomainEvents::dispatch(new ReceivedRequestEvent($request));
+        for ($i = 0; $i<count($this->routes); $i++) {
+            $route = $this->routes[$i];
 
-        foreach ($this->routes as $route) {
+            // intialize the list of injectable arguments for the action
+            $args = $tmpargs = [];
 
-            $method = $route['method'];
-            $uri = $route['uri'];
-            $action = $route['action'];
+            // if a specified method doesn't match, skip to the next route
+            if ($route->hasMethod() && !$route->matchMethod($request->getMethod(), $args)) {
+                continue;
+            }
 
-            $args = array();
-
-            $matchMethod = $request->getMethod() === $method;
-            $matchPattern = $matchHeaders = false;
-
-            // if route matched method, check uri
-            if ($matchMethod) {
-                $matchPattern = preg_match('!'.$uri.'!', $requestUri, $fromUri);
-                if ($matchPattern) {
-                    $args = $fromUri;
+            // if any specified headers don't match, skip to the next route
+            if ($route->hasHeaders()) {
+                foreach ($route->getHeaderNames() as $header) {
+                    if (method_exists($request, 'get'.$header)) {
+                        $method = 'get'.$header;
+                        if (!$route->matchHeader($header, $request->$method(), $tmpargs)) {
+                            continue 2;
+                        }
+                    } elseif (!$route->matchHeader($header, $request->getHeader($header), $tmpargs)) {
+                        continue 2;
+                    }
+                    $args = array_merge($tmpargs);
                 }
             }
 
-            // if route matched pattern (which assumes it also matched method)
-            // then check any headers
-            if ($matchPattern && count($route['headers']) > 0) {
-                foreach ($route['headers'] as $routeHeader => $routeValue) {
+            // if the URI doesn't match, skip to the next route
+            if (!$route->matchUri($request->getUri(), $tmpargs)) {
+                continue;
+            }
+            $args = array_merge($args, $tmpargs);
 
-                    $headerMethod = 'get'.$routeHeader;
+            // add the request object as an injectable argument
+            $args['request'] = $request;
 
-                    // throw exception if method doesn't exist
-                    if (!method_exists($request, $headerMethod)) {
-                        throw new InvalidHeaderException($routeHeader);
-                    }
-
-                    if (preg_match('!'.$routeValue.'!', $request->$headerMethod($routeHeader), $fromHeader)) {
-                        $args = array_merge($args, $fromHeader);
-                        $matchHeaders = true;
-                    }
-                }
+            $action = $route->getAction();
+            if ($action instanceof \Closure) {
+                $response = $this->di->injectFunction($action, $args);
             } else {
-                // if route doesn't specify headers, then this needs
-                // to be true so the route matches
-                $matchHeaders = true;
+                // check if we've already instantiated the object,
+                // if so, then use the existing object
+                $class = $action[0];
+                if (!isset($this->controllers[$class])) {
+                    $this->controllers[$class] = $this->di->injectConstructor($class, array('di' => '%DI'));
+                }
+                $response = $this->di->injectMethod($this->controllers[$class], $action[1], $args);
             }
 
-            // if everything matched, call the action
-            if ($matchMethod && $matchPattern && $matchHeaders) {
-                $args['request'] = $request;
+            DomainEvents::dispatch(new DispatchedRequestEvent($request, $route, $args));
 
-                if ($action instanceof \Closure) {
-                    $response = $this->di->injectFunction($action, $args);
-                } else {
-                    // check if we've already instantiated the object,
-                    // if so, then use the existing object
-                    $class = $action[0];
-                    if (!isset($this->controllers[$class])) {
-                        $this->controllers[$class] = $this->di->injectConstructor($class, array('di' => '%DI'));
-                    }
-                    $response = $this->di->injectMethod($this->controllers[$class], $action[1], $args);
-                }
-                DomainEvents::dispatch(new DispatchedRequestEvent($request, $route, $args));
-
-                // if we get a request returned, dispatch it
-                if ($response instanceof RequestInterface) {
-                    $response = $this->dispatch($response);
-                }
-
-                if ($response instanceof ResponseInterface) {
-                    break;
-                }
+            // if we get a request returned, dispatch it
+            if ($response instanceof RequestInterface) {
+                $request = $response;
+                $response = null;
+                $i = 0;
+            } elseif ($response instanceof ResponseInterface) {
+                break;
             }
-
         }
 
         return $response;

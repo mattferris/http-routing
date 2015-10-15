@@ -18,7 +18,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         $dispatcher = new Dispatcher();
 
-        $dispatcher->addRoute('^/foo$', function () {
+        $dispatcher->get('^/foo$', function () {
             return new Response();
         });
 
@@ -39,33 +39,15 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         $dispatcher = new Dispatcher();
 
-        $dispatcher->addRoute(
+        $dispatcher->get(
             '^/foo$',
             function () { return new Response(); },
-            'GET',
             array('Host' => '^example.com$')
         );
 
         $response = $dispatcher->dispatch($request);
         $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
     } 
-
-    /**
-     * @depends testRequestHeaderMatch
-     * @expectedException MattFerris\HttpRouting\InvalidHeaderException
-     */
-    public function testInvalidHeaderInMatch()
-    {
-        $request = new Request(array(
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/foo'
-        ));
-
-        $dispatcher = new Dispatcher();
-        $dispatcher
-            ->addRoute('^/foo$', function () {}, 'GET', array('Foo' => '^bar$'))
-            ->dispatch($request);
-    }
 
     /**
      * @depends testRequestHeaderMatch
@@ -88,10 +70,9 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         $dispatcher = new Dispatcher();
 
-        $dispatcher->addRoute(
+        $dispatcher->get(
             '^/(?P<fromUri>foo)$',
             $action,
-            'GET',
             array('Host' => '^(?<fromHostHeader>example.com)$')
         );
 
@@ -113,11 +94,9 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         ));
 
         $dispatcher = new Dispatcher();
-
-        $dispatcher->addRoutes(array(
-            array('method' => 'GET', 'uri' => '^/foo$', 'action' => function () { /* do nothing */ }),
-            array('method' => 'GET', 'uri' => '^/foo$', 'action' => function () { return new Response(); })
-        ));
+        $dispatcher
+            ->get('^/foo$', function () { /* do nothing */ })
+            ->get('^/foo$', function () { return new Response(); });
 
         $response = $dispatcher->dispatch($request);
         $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
@@ -141,10 +120,9 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $dispatcher = new Dispatcher();
 
         $foo = false;
-        $dispatcher->addRoutes(array(
-            array('uri' => '^/foo$', 'action' => function () use ($requestB) { return $requestB; }),
-            array('uri' => '^/bar$', 'action' => function () use (&$foo) { $foo = true; })
-        ));
+        $dispatcher
+            ->get('^/foo$', function () use ($requestB) { return $requestB; })
+            ->get('^/bar$', function () use (&$foo) { $foo = true; });
 
         $dispatcher->dispatch($requestA);
 
@@ -166,7 +144,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
                 array('method' => 'GET', 'uri' => 'foo', 'action' => function () {
                     return new Response();
                 }),
-                array('method' => 'GET', 'uri' => 'bar', 'action' => 'DispatcherTest_Stub:stubAction')
+                array('method' => 'GET', 'uri' => 'bar', 'action' => array('DispatcherTest_Stub', 'stubAction'))
             )));
 
 
