@@ -60,19 +60,6 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
     }
 
     /**
-     * Generate a log message for ExceptionRaiseEvent events
-     *
-     * @param \MattFerris\HttpRouting\ExceptionRaisedEvent $event The dispatched event
-     * @return string The generated log message
-     */
-    static public function onExceptionRaisedEvent(ExceptionRaisedEvent $event)
-    {
-        $e = $event->getException();
-        return 'caught exception "'.get_class($e).'"'
-            .' with message "'.$e->getMessage().'" in '.$e->getFile().':'.$e->getLine();
-    }
-
-    /**
      * Generate a log message for ReceivedRequestEvent events
      *
      * @param \MattFerris\HttpRouting\ReceivedRequestEvent $event The dispatched event
