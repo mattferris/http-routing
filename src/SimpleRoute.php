@@ -49,8 +49,8 @@ class SimpleRoute implements RouteInterface
             throw new \InvalidArgumentException('$uri expects non-empty string');
         }
 
-        if (!is_string($method) || empty($method)) {
-            throw new \InvalidArgumentException('$method expects non-empty string');
+        if (!is_null($method) && (!is_string($method) || empty($method))) {
+            throw new \InvalidArgumentException('$method expects non-empty string or null');
         }
 
         $this->uri = $uri;
