@@ -37,13 +37,13 @@ interface DispatcherInterface
     /**
      * Add a route by supplying all the parameters
      *
-     * @param string $method The HTTP method to match
      * @param string $uri The URI to match
-     * @param string[string] $headers Any HTTP headers to match
      * @param callable $action The action to dispatch the request to
+     * @param string[string] $headers Any HTTP headers to match
+     * @param string $method The HTTP method to match
      * @return self
      */
-    public function route($method, $uri, array $headers, callable $action);
+    public function route($uri, callable $action, $method, array $headers);
 
     /**
      * Add a route to match any HTTP method

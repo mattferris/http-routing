@@ -6,6 +6,7 @@ use MattFerris\HttpRouting\Dispatcher;
 use MattFerris\HttpRouting\RequestInterface;
 use MattFerris\HttpRouting\Request;
 use MattFerris\HttpRouting\Response;
+use MattFerris\HttpRouting\SimpleRoute;
 
 class DispatcherTest extends PHPUnit_Framework_TestCase
 {
@@ -18,11 +19,132 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         $dispatcher = new Dispatcher();
 
-        $dispatcher->get('^/foo$', function () {
+        $dispatcher->add(new SimpleRoute('/foo', function () {
             return new Response();
-        });
+        }));
 
         $response = $dispatcher->dispatch($request);
+        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+    }
+
+    /**
+     * @testDispatch
+     */
+    public function testAddRouteViaInsert()
+    {
+        $request = new Request(array(
+            'REQUEST_METHOD' => 'GET',
+            'REQUEST_URI' => '/foo'
+        ));
+
+        $route = new SimpleRoute('/foo', function () {
+            return new Response('via insert()');
+        }, 'GET');
+
+        // add a route for /foo, then insert a new route for /foo in it's place
+        $dispatcher = new Dispatcher();
+        $dispatcher->get('/foo', function () { return new Response('via get()'); });
+        $dispatcher->insert($route, 0);
+        $response = $dispatcher->dispatch($request);
+
+        $this->assertEquals('via insert()', $response->getBody());
+
+        $this->setExpectedException('\InvalidArgumentException', '$position out of range');
+        $dispatcher->insert($route, 10);
+    }
+
+    /**
+     * @testDispatch
+     */
+    public function testAddRouteViaRoute()
+    {
+        $request = new Request(array(
+            'REQUEST_METHOD' => 'GET',
+            'REQUEST_URI' => '/foo'
+        ));
+
+        $dispatcher = new Dispatcher();
+        $dispatcher->route('/foo', function() {
+            return new Response();
+        }, 'GET', array()); 
+        $response = $dispatcher->dispatch($request);
+
+        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+    }
+
+    /**
+     * @testDispatch
+     */
+    public function testAddRouteViaAny()
+    {
+        $request = new Request(array(
+            'REQUEST_METHOD' => 'GET',
+            'REQUEST_URI' => '/foo'
+        ));
+
+        $dispatcher = new Dispatcher();
+        $dispatcher->any('/foo', function () {
+            return new Response();
+        });
+        $response = $dispatcher->dispatch($request);
+
+        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+    }
+
+    /**
+     * @testDispatch
+     */
+    public function testAddRouteViaGet()
+    {
+        $request = new Request(array(
+            'REQUEST_METHOD' => 'GET',
+            'REQUEST_URI' => '/foo'
+        ));
+
+        $dispatcher = new Dispatcher();
+        $dispatcher->get('/foo', function () {
+            return new Response();
+        });
+        $response = $dispatcher->dispatch($request);
+
+        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+    }
+
+    /**
+     * @testDispatch
+     */
+    public function testAddRouteViaPost()
+    {
+        $request = new Request(array(
+            'REQUEST_METHOD' => 'POST',
+            'REQUEST_URI' => '/foo'
+        ));
+
+        $dispatcher = new Dispatcher();
+        $dispatcher->post('/foo', function () {
+            return new Response();
+        });
+        $response = $dispatcher->dispatch($request);
+
+        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+    }
+
+    /**
+     * @testDispatch
+     */
+    public function testAddRouteViaPut()
+    {
+        $request = new Request(array(
+            'REQUEST_METHOD' => 'PUT',
+            'REQUEST_URI' => '/foo'
+        ));
+
+        $dispatcher = new Dispatcher();
+        $dispatcher->put('/foo', function () {
+            return new Response();
+        });
+        $response = $dispatcher->dispatch($request);
+
         $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
     }
 

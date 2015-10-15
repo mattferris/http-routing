@@ -65,7 +65,7 @@ class Dispatcher implements DispatcherInterface
     public function insert(RouteInterface $route, $position)
     {
         if (!is_int($position) || $position < 0 || $position > count($position)) {
-            throw new \InvalidArgumentExcetion('$position out of range');
+            throw new \InvalidArgumentException('$position out of range');
         }
         array_splice($this->routes, $position, 0, [$route]);
         return $this;
@@ -74,13 +74,13 @@ class Dispatcher implements DispatcherInterface
     /**
      * Add a route by supplying all the parameters
      *
-     * @param string $method The HTTP method to match
      * @param string $uri The URI to match
-     * @param string[string] $headers Any HTTP headers to match
      * @param callable $action The action to dispatch the request to
+     * @param string $method The HTTP method to match
+     * @param string[string] $headers Any HTTP headers to match
      * @return self
      */
-    public function route($method, $uri, array $headers, callable $action)
+    public function route($uri, callable $action, $method, array $headers)
     {
         $class = $this->defaultRouteType;
         return $this->add(new $class($uri, $action, $method, $headers));
@@ -96,7 +96,7 @@ class Dispatcher implements DispatcherInterface
      */
     public function any($uri, callable $action, array $headers = [])
     {
-        return $this->route(null, $uri, $headers, $action);
+        return $this->route($uri, $action, null, $headers);
     }
 
     /**
@@ -109,7 +109,7 @@ class Dispatcher implements DispatcherInterface
      */
     public function get($uri, callable $action, array $headers = [])
     {
-        return $this->route('GET', $uri, $headers, $action);
+        return $this->route($uri, $action, 'GET', $headers);
     }
 
     /**
@@ -122,7 +122,7 @@ class Dispatcher implements DispatcherInterface
      */
     public function post($uri, callable $action, array $headers = [])
     {
-        return $this->route('POST', $uri, $headers, $action);
+        return $this->route($uri, $action, 'POST', $headers);
     }
 
     /**
@@ -135,7 +135,7 @@ class Dispatcher implements DispatcherInterface
      */
     public function put($uri, callable $action, array $headers = [])
     {
-        return $this->route('PUT', $uri, $headers, $action);
+        return $this->route($uri, $action, 'PUT', $headers);
     }
 
     /**
@@ -168,7 +168,7 @@ class Dispatcher implements DispatcherInterface
                 throw new InvalidRouteCriteriaException('headers must be an array');
             }
 
-            $this->route($criteria['method'], $criteria['uri'], $criteria['headers'], $criteria['action']);
+            $this->route($criteria['uri'], $criteria['action'], $criteria['method'], $criteria['headers']);
         }
 
         return $this;
