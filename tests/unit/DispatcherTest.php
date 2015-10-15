@@ -167,6 +167,66 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $response = $dispatcher->dispatch($requestB);
         $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
     }
+
+    /**
+     * @depends testBundleRegistration
+     * @expectedException MattFerris\HttpRouting\InvalidRouteCriteriaException
+     * @expectedExceptionMessage missing URI
+     */
+    public function testBundleRegistrationMissingUri()
+    {
+        $bundle = $this->getMockBuilder('MattFerris\HttpRouting\BundleInterface')
+            ->setMethods(array('provides'))
+            ->getMock();
+
+        $bundle->expects($this->once())
+            ->method('provides')
+            ->will($this->returnValue(array(
+                array('method' => 'GET', 'action' => function() {})
+            )));
+
+        $dispatcher = (new Dispatcher())->register($bundle);
+    }
+
+    /**
+     * @depends testBundleRegistration
+     * @expectedException MattFerris\HttpRouting\InvalidRouteCriteriaException
+     * @expectedExceptionMessage missing action
+     */
+    public function testBundleRegistrationMissingAction()
+    {
+        $bundle = $this->getMockBuilder('MattFerris\HttpRouting\BundleInterface')
+            ->setMethods(array('provides'))
+            ->getMock();
+
+        $bundle->expects($this->once())
+            ->method('provides')
+            ->will($this->returnValue(array(
+                array('method' => 'GET', 'uri' => 'foo')
+            )));
+
+        $dispatcher = (new Dispatcher())->register($bundle);
+    }
+
+    /**
+     * @depends testBundleRegistration
+     * @expectedException MattFerris\HttpRouting\InvalidRouteCriteriaException
+     * @expectedExceptionMessage headers must be an array
+     */
+    public function testBundleRegistrationBadHeaders()
+    {
+        $bundle = $this->getMockBuilder('MattFerris\HttpRouting\BundleInterface')
+            ->setMethods(array('provides'))
+            ->getMock();
+
+        $bundle->expects($this->once())
+            ->method('provides')
+            ->will($this->returnValue(array(
+                array('method' => 'GET', 'uri' => 'foo', 'action' => function(){}, 'headers' => 'foo')
+            )));
+
+        $dispatcher = (new Dispatcher())->register($bundle);
+    }
 }
 
 class DispatcherTest_Stub
