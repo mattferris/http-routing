@@ -151,11 +151,11 @@ class Dispatcher implements DispatcherInterface
     {
         foreach ($bundle->provides() as $criteria) {
             if (!isset($criteria['uri'])) {
-                throw InvalidRouteCriteriaException('missing URI');
+                throw new InvalidRouteCriteriaException('missing URI');
             }
 
             if (!isset($criteria['action'])) {
-                throw InvalidRouteCriteriaException('missing action');
+                throw new InvalidRouteCriteriaException('missing action');
             }
 
             if (!isset($criteria['method'])) {
@@ -165,7 +165,7 @@ class Dispatcher implements DispatcherInterface
             if (!isset($criteria['headers'])) {
                 $criteria['headers'] = [];
             } elseif (!is_array($criteria['headers'])) {
-                throw InvalidRouteCriteriaException('headers must be an array');
+                throw new InvalidRouteCriteriaException('headers must be an array');
             }
 
             $this->route($criteria['method'], $criteria['uri'], $criteria['headers'], $criteria['action']);
@@ -232,6 +232,10 @@ class Dispatcher implements DispatcherInterface
             if ($action instanceof \Closure) {
                 $response = $this->di->injectFunction($action, $args);
             } else {
+                if (is_string($action)) {
+                    $action = explode('::', $action);
+                }
+
                 // check if we've already instantiated the object,
                 // if so, then use the existing object
                 $class = $action[0];
