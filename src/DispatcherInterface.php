@@ -86,6 +86,46 @@ interface DispatcherInterface
     public function put($uri, callable $action, array $headers = array());
 
     /**
+     * Add a route to match an HTTP DELETE request
+     *
+     * @param string $uri The URI to match
+     * @param callable $action The action to dispatch the request to
+     * @param string[string] $headers Any HTTP headers to match
+     * @return self
+     */
+    public function delete($uri, callable $action, array $headers = array());
+
+    /**
+     * Add a route to match an HTTP HEAD request
+     *
+     * @param string $uri The URI to match
+     * @param callable $action The action to dispatch the request to
+     * @param string[string] $headers Any HTTP headers to match
+     * @return self
+     */
+    public function head($uri, callable $action, array $headers = array());
+
+    /**
+     * Add a route to match an HTTP OPTIONS request
+     *
+     * @param string $uri The URI to match
+     * @param callable $action The action to dispatch the request to
+     * @param string[string] $headers Any HTTP headers to match
+     * @return self
+     */
+    public function options($uri, callable $action, array $headers = array());
+
+    /**
+     * Add a route to match an HTTP TRACE request
+     *
+     * @param string $uri The URI to match
+     * @param callable $action The action to dispatch the request to
+     * @param string[string] $headers Any HTTP headers to match
+     * @return self
+     */
+    public function trace($uri, callable $action, array $headers = array());
+
+    /**
      * Register a routing bundle, callind provdes() on the bundle to return
      * all the routes in the bundle. Add the routes via addRoutes().
      *

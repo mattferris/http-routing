@@ -149,6 +149,82 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @testDispatch
+     */
+    public function testAddRouteViaDelete()
+    {
+        $request = new Request(array(
+            'REQUEST_METHOD' => 'DELETE',
+            'REQUEST_URI' => '/foo'
+        ));
+
+        $dispatcher = new Dispatcher();
+        $dispatcher->delete('/foo', function () {
+            return new Response();
+        });
+        $response = $dispatcher->dispatch($request);
+
+        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+    }
+
+    /**
+     * @testDispatch
+     */
+    public function testAddRouteViaHead()
+    {
+        $request = new Request(array(
+            'REQUEST_METHOD' => 'HEAD',
+            'REQUEST_URI' => '/foo'
+        ));
+
+        $dispatcher = new Dispatcher();
+        $dispatcher->head('/foo', function () {
+            return new Response();
+        });
+        $response = $dispatcher->dispatch($request);
+
+        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+    }
+
+    /**
+     * @testDispatch
+     */
+    public function testAddRouteViaOptions()
+    {
+        $request = new Request(array(
+            'REQUEST_METHOD' => 'OPTIONS',
+            'REQUEST_URI' => '/foo'
+        ));
+
+        $dispatcher = new Dispatcher();
+        $dispatcher->options('/foo', function () {
+            return new Response();
+        });
+        $response = $dispatcher->dispatch($request);
+
+        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+    }
+
+    /**
+     * @testDispatch
+     */
+    public function testAddRouteViaTrace()
+    {
+        $request = new Request(array(
+            'REQUEST_METHOD' => 'TRACE',
+            'REQUEST_URI' => '/foo'
+        ));
+
+        $dispatcher = new Dispatcher();
+        $dispatcher->trace('/foo', function () {
+            return new Response();
+        });
+        $response = $dispatcher->dispatch($request);
+
+        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+    }
+
+    /**
      * @depends testDispatch
      */
     public function testRequestHeaderMatch()
