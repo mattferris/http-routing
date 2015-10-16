@@ -26,7 +26,21 @@ class RegexRoute extends SimpleRoute
      */
     public function matchUri($uri, array &$matches = array())
     {
-        return preg_match('!'.$this->uri.'!', $uri, $matches);
+        return (bool)preg_match('!'.$this->uri.'!', $uri, $matches);
+    }
+
+    /**
+     * Match the supplied HTTP method against the route's method, match should
+     * be case-insensitive
+     *
+     * @param string The HTTP method to match
+     * @param array &$matches Any partial URI matches
+     * @return bool True if method matches, otherwise false
+     * @throws \InvalidArgumentException If $method isn't a string
+     */
+    public function matchMethod($method, array &$matches = array())
+    {
+        return (bool)preg_match('!'.$this->method.'!', $method, $matches);
     }
 
     /**

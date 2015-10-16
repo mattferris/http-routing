@@ -79,7 +79,7 @@ class SimpleRoute implements RouteInterface
      */
     public function matchUri($uri, array &$matches = array())
     {
-        return (strcmp($this->uri, $uri) === 0);
+        return (strpos($uri, $this->uri) === 0);
     }
 
     /**
