@@ -1,9 +1,15 @@
 <?php
 
 /**
+ * HttpRouting - An HTTP routing dispatcher
+ * www.bueller.ca/http-routing
+ *
  * DomainEventLoginHelpers.php
- * Copyright (c) 2014
+ * @copyright Copyright (c) 2014
  * @author Matt Ferris <matt@bueller.ca>
+ *
+ * Licensed under BSD 2-clause license
+ * www.bueller.ca/http-routing/license
  */
 
 namespace MattFerris\HttpRouting;
@@ -13,8 +19,10 @@ use MattFerris\Events\AbstractLoggerHelpers;
 class DomainEventLoggerHelpers extends AbstractLoggerHelpers
 {
     /**
-     * @param DispatchedRequestEvent $event
-     * @return string
+     * Generate a log message for DispatcheRequestEvent events
+     *
+     * @param \MattFerris\HttpRouting\DispatchedRequestEvent $event The dispatched event
+     * @return string The generated log message
      */
     static public function onDispatchedRequestEvent(DispatchedRequestEvent $event)
     {
@@ -52,19 +60,10 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
     }
 
     /**
-     * @param ExceptionRaisedEvent $event
-     * @return string
-     */
-    static public function onExceptionRaisedEvent(ExceptionRaisedEvent $event)
-    {
-        $e = $event->getException();
-        return 'caught exception "'.get_class($e).'"'
-            .' with message "'.$e->getMessage().'" in '.$e->getFile().':'.$e->getLine();
-    }
-
-    /**
-     * @param ReceivedRequestEvent $event
-     * @return string
+     * Generate a log message for ReceivedRequestEvent events
+     *
+     * @param \MattFerris\HttpRouting\ReceivedRequestEvent $event The dispatched event
+     * @return string The generated log message
      */
     static public function onReceivedRequestEvent(ReceivedRequestEvent $event)
     {
@@ -73,8 +72,10 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
     }
 
     /**
-     * @param RouteNotFoundEvent $event
-     * @return string
+     * Generate a log message for RouteNotFoundEvent events
+     *
+     * @param \MattFerris\HttpRouting\RouteNotFoundEvent $event The dispatched event
+     * @return string The generated log message
      */
     static public function onRouteNotFoundEvent(RouteNotFoundEvent $event)
     {

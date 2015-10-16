@@ -4,7 +4,7 @@
  * HttpRouting - An HTTP routing dispatcher
  * www.bueller.ca/http-routing
  *
- * RouteAddedEvent.php
+ * InvalidRouteCriteriaException.php
  * @copyright Copyright (c) 2015
  * @author Matt Ferris <matt@bueller.ca>
  *
@@ -14,7 +14,7 @@
 
 namespace MattFerris\HttpRouting;
 
-class RouteAddedEvent extends AbstractRouteEvent
+class InvalidRouteCriteriaException extends \Exception
 {
 }
 

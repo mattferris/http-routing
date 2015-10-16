@@ -1,9 +1,15 @@
 <?php
 
 /**
+ * HttpRouting - An HTTP routing dispatcher
+ * www.bueller.ca/http-routing
+ *
  * DispatchedRequestEvent.php
- * Copyright (c) 2015
+ * @copyright Copyright (c) 2015
  * @author Matt Ferris <matt@bueller.ca>
+ *
+ * Licensed under BSD 2-clause license
+ * www.bueller.ca/http-routing/license
  */
 
 namespace MattFerris\HttpRouting;
@@ -11,21 +17,24 @@ namespace MattFerris\HttpRouting;
 class DispatchedRequestEvent extends AbstractRequestEvent
 {
     /**
-     * @var mixed
+     * @var \MattFerris\HttpRouting\RouteInterface The route the event was
+     *     dispatched for
      */
     protected $route;
 
     /**
-     * @var array
+     * @var array Additional arguments passed to the event
      */
     protected $args;
 
     /**
-     * @param RequestInterface $request
-     * @param mixed $route
-     * @param array $args
+     * @param \MattFerris\HttpRouting\RequestInterface $request The request the
+     *     event was dispatched for
+     * @param \MattFerris\HttpRouting\RouteInterface $route The route that the
+     *     request matched
+     * @param array $args Any extra arguments passed to the event
      */
-    public function __construct(RequestInterface $request, $route, array $args)
+    public function __construct(RequestInterface $request, RouteInterface $route, array $args)
     {
         $this->route = $route;
         $this->args = $args;
@@ -33,7 +42,7 @@ class DispatchedRequestEvent extends AbstractRequestEvent
     }
 
     /**
-     * @return mixed
+     * @return \MattFerris\HttpRouting\RouteInterface The route for the event
      */
     public function getRoute()
     {
@@ -41,7 +50,7 @@ class DispatchedRequestEvent extends AbstractRequestEvent
     }
 
     /**
-     * @return array
+     * @return array Return the arguments passed to the event
      */
     public function getArgs()
     {

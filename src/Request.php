@@ -1,9 +1,15 @@
 <?php
 
 /**
+ * HttpRouting - An HTTP routing dispatcher
+ * www.bueller.ca/http-routing
+ *
  * Request.php
- * Copyright (c) 2015
+ * @copyright Copyright (c) 2015
  * @author Matt Ferris <matt@bueller.ca>
+ *
+ * Licensed under BSD 2-clause license
+ * www.bueller.ca/http-routing/license
  */
 
 namespace MattFerris\HttpRouting;
@@ -11,41 +17,41 @@ namespace MattFerris\HttpRouting;
 class Request implements RequestInterface
 {
     /**
-     * @var array
+     * @var array Server values (typically from $_SERVER)
      */
     protected $server = array();
 
     /**
-     * @var array
+     * @var array Query string parameters (typically from $_GET)
      */
     protected $_get = array();
 
     /**
-     * @var array
+     * @var array Posted form values (typically from $_POST)
      */
     protected $_post = array();
 
     /**
-     * @var array
+     * @var array Cookies sent by the client (typically from $_COOKIES)
      */
     protected $_cookie = array();
 
     /**
-     * @var array
+     * @var array Request headers
      */
     protected $headers = array();
 
     /**
-     * @var array
+     * @var array Custom attributes added to the request
      */
     protected $attributes = array();
 
     /**
-     * @param array $server
-     * @param array $get
-     * @param array $post
-     * @param array $cookie
-     * @param array $headers
+     * @param array $server Server values (typically from $_SERVER)
+     * @param array $get Query string parameters (typically from $_GET)
+     * @param array $post Posted form values (typically from $_POST)
+     * @param array $cookie Cookies sent by the client (typically from $_COOKES)
+     * @param array $headers Request headers
      */
     public function __construct(array $server = null, array $get = null, array $post = null, array $cookie = null, array $headers = null)
     {
@@ -82,9 +88,11 @@ class Request implements RequestInterface
 
 
     /**
-     * @param string $list
-     * @param bool $keyValue
-     * @return array
+     * Parse a list of values from a header value
+     *
+     * @param string $list The header value to parse
+     * @param bool $keyValue If true, break into key=>value pairs
+     * @return array The list of values
      */
     protected function parseList($list, $keyValue = false)
     {
@@ -110,7 +118,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return bool
+     * Check whether the request was made using HTTPS
+     *
+     * @return bool True if an HTTPS request, otherwise false
      */
     public function isHttps()
     {
@@ -118,7 +128,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return string
+     * Get the HTTP method used in the request
+     *
+     * @return string The HTTP method used
      */
     public function getMethod()
     {
@@ -126,7 +138,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return string
+     * Get the request URI
+     *
+     * @return string The request URI
      */
     public function getUri()
     {
@@ -134,7 +148,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return string
+     * Get the value of the Host header
+     *
+     * @return string The value of the Host header
      */
     public function getHost()
     {
@@ -142,7 +158,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return string
+     * Get the value of the Connection header
+     *
+     * @return string The value of the Connectoin header
      */
     public function getConnection()
     {
@@ -150,7 +168,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return array
+     * Get the value of the Cache-Control header as an array
+     *
+     * @return array The parsed values in the Cache-Control header
      */
     public function getCacheControl()
     {
@@ -179,7 +199,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return array
+     * Get the value of the Accept header as an array
+     *
+     * @return array The parsed values in the Accept header
      */
     public function getAccept()
     {
@@ -208,7 +230,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return array
+     * Get the value of the Accept-Encoding header as an array
+     *
+     * @return array The parsed values in the Accept-Encoding header
      */
     public function getAcceptEncoding()
     {
@@ -237,7 +261,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return array
+     * Get the value of the Accept-Language header as an array
+     *
+     * @return array The parsed values in the Accept-Language header
      */
     public function getAcceptLanguage()
     {
@@ -266,7 +292,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return string
+     * Get the value of the User-Agent header
+     *
+     * @return string The value of the User-Agent header
      */
     public function getUserAgent()
     {
@@ -274,7 +302,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return string
+     * Get the server name
+     *
+     * @return string The server name
      */
     public function getServerName()
     {
@@ -282,7 +312,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return string
+     * Get the server address
+     *
+     * @return string The server address
      */
     public function getServerAddr()
     {
@@ -290,7 +322,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return int
+     * Get the server port
+     *
+     * @return int The server port
      */
     public function getServerPort()
     {
@@ -298,7 +332,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return string
+     * Get the remote address
+     *
+     * @return string The remote address
      */
     public function getRemoteAddr()
     {
@@ -306,7 +342,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return int
+     * Get the remote port
+     *
+     * @return int The remote port
      */
     public function getRemotePort()
     {
@@ -314,7 +352,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return string
+     * Get the user provided by HTTP authentication
+     *
+     * @return string The HTTP auth user
      */
     public function getAuthUser()
     {
@@ -322,7 +362,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return string
+     * Get the password provided by HTTP authentication
+     *
+     * @return string The HTTP auth password
      */
     public function getAuthPass()
     {
@@ -330,7 +372,9 @@ class Request implements RequestInterface
     }
 
     /**
-     * @return array
+     * Get the query string as an array
+     *
+     * @return array The query string
      */
     public function getQueryString()
     {
@@ -338,8 +382,11 @@ class Request implements RequestInterface
     }
 
     /**
-     * @param string $key
-     * @return mixed
+     * Get the value of the query string parameter, $key
+     *
+     * @param string $key The parameter to return
+     * @return mixed|null The value of the parameter $key, or null if $key
+     *     doesn't exist
      */
     public function get($key = null)
     {
@@ -354,8 +401,11 @@ class Request implements RequestInterface
     }
 
     /**
-     * @param string $key
-     * @return mixed
+     * Get the value of the POST'd parameter, $key
+     *
+     * @param string $key The parameter to return
+     * @return mixed|null The value of the parameter $key, or null if $key
+     *     doesn't exist
      */
     public function post($key = null)
     {
@@ -370,8 +420,11 @@ class Request implements RequestInterface
     }
 
     /**
-     * @param string $key
-     * @return mixed
+     * Get the value of the cookie named $key
+     *
+     * @param string $key The name of the cookie
+     * @return mixed|null The value of the cookie $key, or null if the
+     *     cookie doesn't exist
      */
     public function cookie($key = null)
     {
@@ -386,8 +439,11 @@ class Request implements RequestInterface
     }
 
     /**
-     * @param string $header
-     * @return string
+     * Get the value of the specified header
+     *
+     * @param string $header The header to return the value of
+     * @return string|null The value of the header, or null if the header
+     *     doesn't exist
      */
     public function getHeader($header)
     {
@@ -399,8 +455,11 @@ class Request implements RequestInterface
     }
 
     /**
-     * @param string $key
-     * @param mixed $value
+     * Set the value of the specified attribute
+     *
+     * @param string $key The attribute to set the value of
+     * @param mixed $value The value of the attribute
+     * @throws \InvalidArgumentException The passed value for $key was invalid
      */
     public function setAttribute($key, $value)
     {
@@ -411,7 +470,10 @@ class Request implements RequestInterface
     }
 
     /**
-     * @param string $key
+     * Get the value of the specified attribute
+     *
+     * @param string $key The attribute to get the value of
+     * @return mixed|null The value of the attribute, or null if it doesn't exist
      */
     public function getAttribute($key)
     {
