@@ -260,7 +260,8 @@ class Dispatcher implements DispatcherInterface
 
         DomainEvents::dispatch(new ReceivedRequestEvent($request));
 
-        for ($i = 0; $i<count($this->routes); $i++) {
+        $nroutes = count($this->routes);
+        for ($i = 0; $i<$nroutes; $i++) {
             $route = $this->routes[$i];
 
             // intialize the list of injectable arguments for the action

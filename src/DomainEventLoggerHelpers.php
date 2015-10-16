@@ -70,16 +70,5 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
         $req = $event->getRequest();
         return 'received request "'.$req->getMethod().' '.$req->getUri().'"';
     }
-
-    /**
-     * Generate a log message for RouteNotFoundEvent events
-     *
-     * @param \MattFerris\HttpRouting\RouteNotFoundEvent $event The dispatched event
-     * @return string The generated log message
-     */
-    static public function onRouteNotFoundEvent(RouteNotFoundEvent $event)
-    {
-        return 'no route found to dispatch request "'.$event->getRequest()->getUri().'"';
-    }
 }
 
