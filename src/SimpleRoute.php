@@ -34,7 +34,7 @@ class SimpleRoute implements RouteInterface
     /**
      * @var string[string] Any HTTP headers to match
      */
-    protected $headers = [];
+    protected $headers = array();
 
     /**
      * @param string $uri The URI pattern
@@ -43,7 +43,7 @@ class SimpleRoute implements RouteInterface
      * @param string[string] $headers Any HTTP headers to match
      * @throws \InvalidArgumentException If $uri or method is empty or non-string
      */
-    public function __construct($uri, callable $action, $method = null, array $headers = [])
+    public function __construct($uri, callable $action, $method = null, array $headers = array())
     {
         if (!is_string($uri) || empty($uri)) {
             throw new \InvalidArgumentException('$uri expects non-empty string');
@@ -77,7 +77,7 @@ class SimpleRoute implements RouteInterface
      * @return bool True if URI matches, otherwise false
      * @throws \InvalidArgumentException If $uri isn't a string
      */
-    public function matchUri($uri, array &$matches = [])
+    public function matchUri($uri, array &$matches = array())
     {
         return (strcmp($this->uri, $uri) === 0);
     }
@@ -111,7 +111,7 @@ class SimpleRoute implements RouteInterface
      * @return bool True if method matches, otherwise false
      * @throws \InvalidArgumentException If $method isn't a string
      */
-    public function matchMethod($method, array &$matches = [])
+    public function matchMethod($method, array &$matches = array())
     {
         return (strcasecmp($this->method, $method) === 0);
     }
@@ -156,7 +156,7 @@ class SimpleRoute implements RouteInterface
      * @return bool True if header matches, otherwise false
      * @throws \InvalidArgumentException If $header isn't a string
      */
-    public function matchHeader($header, $value, array &$matches = [])
+    public function matchHeader($header, $value, array &$matches = array())
     {
         foreach ($this->headers as $h => $v) {
             if (strcasecmp($h, $header) === 0 && strcmp($v, $value) === 0) {

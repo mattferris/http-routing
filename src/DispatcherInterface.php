@@ -53,7 +53,7 @@ interface DispatcherInterface
      * @param string[string] $headers Any HTTP headers to match
      * @return self
      */
-    public function any($uri, callable $action, array $headers = []);
+    public function any($uri, callable $action, array $headers = array());
 
     /**
      * Add a route to match an HTTP GET request
@@ -63,7 +63,7 @@ interface DispatcherInterface
      * @param string[string] $headers Any HTTP headers to match
      * @return self
      */
-    public function get($uri, callable $action, array $headers = []);
+    public function get($uri, callable $action, array $headers = array());
 
     /**
      * Add a route to match an HTTP POST request
@@ -73,7 +73,7 @@ interface DispatcherInterface
      * @param string[string] $headers Any HTTP headers to match
      * @return self
      */
-    public function post($uri, callable $action, array $headers = []);
+    public function post($uri, callable $action, array $headers = array());
 
     /**
      * Add a route to match an HTTP PUT request
@@ -83,7 +83,7 @@ interface DispatcherInterface
      * @param string[string] $headers Any HTTP headers to match
      * @return self
      */
-    public function put($uri, callable $action, array $headers = []);
+    public function put($uri, callable $action, array $headers = array());
 
     /**
      * Register a routing bundle, callind provdes() on the bundle to return

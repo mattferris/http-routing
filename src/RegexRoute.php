@@ -24,7 +24,7 @@ class RegexRoute extends SimpleRoute
      * @return bool True if URI matches, otherwise false
      * @throws \InvalidArgumentException If $uri isn't a string
      */
-    public function matchUri($uri, array &$matches = [])
+    public function matchUri($uri, array &$matches = array())
     {
         return preg_match('!'.$this->uri.'!', $uri, $matches);
     }
@@ -39,7 +39,7 @@ class RegexRoute extends SimpleRoute
      * @return bool True if header matches, otherwise false
      * @throws \InvalidArgumentException If $header isn't a string
      */
-    public function matchHeader($header, $value, array &$matches = [])
+    public function matchHeader($header, $value, array &$matches = array())
     {
         foreach ($this->headers as $h => $v) {
             if (preg_match('!'.$v.'!', $value, $matches)) {

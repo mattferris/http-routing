@@ -31,7 +31,7 @@ interface RouteInterface
      * @return bool True if URI matches, otherwise false
      * @throws \InvalidArgumentException If $uri isn't a string
      */
-    public function matchUri($uri, array &$matches = []);
+    public function matchUri($uri, array &$matches = array());
 
     /**
      * Check the route has HTTP method criteria
@@ -56,7 +56,7 @@ interface RouteInterface
      * @return bool True if method matches, otherwise false
      * @throws \InvalidArgumentException If $method isn't a string
      */
-    public function matchMethod($method, array &$matches = []);
+    public function matchMethod($method, array &$matches = array());
 
     /**
      * Return the route action
@@ -89,6 +89,6 @@ interface RouteInterface
      * @return bool True if header matches, otherwise false
      * @throws \InvalidArgumentException If $header isn't a string
      */
-    public function matchHeader($header, $value, array &$matches = []);
+    public function matchHeader($header, $value, array &$matches = array());
 }
 
