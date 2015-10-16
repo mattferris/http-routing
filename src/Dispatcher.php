@@ -24,7 +24,7 @@ class Dispatcher implements DispatcherInterface
     /**
      * @var string The class name of the default route type
      */
-    protected $defaultRouteType = '\\MattFerris\\HttpRouting\\RegexRoute';
+    protected $defaultRouteType = '\\MattFerris\\HttpRouting\\PathRoute';
 
     /**
      * @var \MattFerris\Di\ContainerInterface The dependency injector instance
@@ -40,6 +40,21 @@ class Dispatcher implements DispatcherInterface
             $di = new \MattFerris\Di\Di();
         }
         $this->di = $di;
+    }
+
+    /**
+     * Set the default class for route objects
+     *
+     * @param string $class The route class
+     * @return self
+     * @throws \InvalidArgumentException If $class isn't a non-empty string
+     */
+    public function setDefaultRouteType($class)
+    {
+        if (!is_string($class) || empty($class)) {
+            throw new \InvalidArgumentException('$class expects non-empty string');
+        }
+        $this->defaultRouteType = $class;
     }
 
     /**
