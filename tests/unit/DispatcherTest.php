@@ -383,7 +383,8 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
                 array('method' => 'GET', 'action' => function() {})
             )));
 
-        $dispatcher = (new Dispatcher())->register($bundle);
+        $dispatcher = new Dispatcher();
+        $dispatcher->register($bundle);
     }
 
     /**
@@ -403,7 +404,8 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
                 array('method' => 'GET', 'uri' => 'foo')
             )));
 
-        $dispatcher = (new Dispatcher())->register($bundle);
+        $dispatcher = new Dispatcher();
+        $dispatcher->register($bundle);
     }
 
     /**
@@ -423,7 +425,8 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
                 array('method' => 'GET', 'uri' => 'foo', 'action' => function(){}, 'headers' => 'foo')
             )));
 
-        $dispatcher = (new Dispatcher())->register($bundle);
+        $dispatcher = new Dispatcher();
+        $dispatcher->register($bundle);
     }
 }
 
