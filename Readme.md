@@ -161,25 +161,13 @@ For more on dependency injection, checkout [mattferris/di](http://bueller.ca/di)
 Bundles
 -------
 
-Within your application, you can define 'bundles', which are a collection of routes that parts of your application can handle. Bundles can be registered with a dispatcher via `register()`. Bundles are just a plain class implementing `BundleInterface`, and must define a single method, `provides()`, which returns an array of the supported routes.
-
-Each route returned by `provides()` must have at least a `uri` and `action` key defined, and if specified `headers` must be a array.
+Within your application, you can define 'bundles', which are a collection of routes that parts of your application can handle. Bundles can be registered with a dispatcher via `register()`. Bundles are just a plain class implementing `BundleInterface`, and must define a single method, `provides()`, which accepts an instance of `Dispatcher` as it's only argument.
 
     class MyAppBundle implements \MattFerris\HttpRouting\BundleInterface
     {
-        public function provides()
+        public function provides(ConsumerInterface $dispatcher)
         {
-            return [
-                [
-                    'method' => 'GET',
-                    'uri' => '/users/{username}',
-                    'headers' => ['Host' => 'example.com'],
-                    'action' => 'Controller:someAction'
-                ],
-                [
-                    ...
-                ]
-            ];
+            $dispatcher->get('/users/{username}', 'Controller::someAction', ['Host => 'example.com']);
         }
     }
 

@@ -10,7 +10,8 @@
     },
     "require": {
         "mattferris/di": "~0.3",
-        "mattferris/events": "~0.2"
+        "mattferris/events": "~0.2",
+        "mattferris/provider": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "~4.3"

@@ -14,11 +14,9 @@
 
 namespace MattFerris\HttpRouting;
 
-interface BundleInterface
+use MattFerris\Provider\ProviderInterface;
+
+interface BundleInterface extends ProviderInterface
 {
-    /**
-     * @return string[int][string] An array of routes
-     */
-    public function provides();
 }
 

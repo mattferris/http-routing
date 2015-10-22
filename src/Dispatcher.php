@@ -14,7 +14,10 @@
 
 namespace MattFerris\HttpRouting; 
 
-class Dispatcher implements DispatcherInterface
+use MattFerris\Provider\ConsumerInterface;
+use MattFerris\Provider\ProviderInterface;
+
+class Dispatcher implements DispatcherInterface, ConsumerInterface
 {
     /**
      * @var \MattFerris\HttpRouting\RouteInterface[] Routes added to the dispatcher
@@ -209,35 +212,12 @@ class Dispatcher implements DispatcherInterface
      * Register a routing bundle, callind provdes() on the bundle to return
      * all the routes in the bundle. Add the routes via addRoutes().
      *
-     * @param \MattFerris\HttpRouting\BundleInterface $bundle The bundle to register
+     * @param \MattFerris\Provider\ProviderInterface $bundle The bundle to register
      * @return self
-     * @throws \MattFerris\HttpRouting\InvalidRouteCriteriaException If the
-     *    criteria for a specified route is invalid or missing
      */
-    public function register(BundleInterface $bundle)
+    public function register(ProviderInterface $bundle)
     {
-        foreach ($bundle->provides() as $criteria) {
-            if (!isset($criteria['uri'])) {
-                throw new InvalidRouteCriteriaException('missing URI');
-            }
-
-            if (!isset($criteria['action'])) {
-                throw new InvalidRouteCriteriaException('missing action');
-            }
-
-            if (!isset($criteria['method'])) {
-                $criteria['method'] = null;
-            }
-
-            if (!isset($criteria['headers'])) {
-                $criteria['headers'] = array();
-            } elseif (!is_array($criteria['headers'])) {
-                throw new InvalidRouteCriteriaException('headers must be an array');
-            }
-
-            $this->route($criteria['uri'], $criteria['action'], $criteria['method'], $criteria['headers']);
-        }
-
+        $bundle->provides($this);  
         return $this;
     }
 

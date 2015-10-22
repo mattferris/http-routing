@@ -126,17 +126,6 @@ interface DispatcherInterface
     public function trace($uri, callable $action, array $headers = array());
 
     /**
-     * Register a routing bundle, callind provdes() on the bundle to return
-     * all the routes in the bundle. Add the routes via addRoutes().
-     *
-     * @param \MattFerris\HttpRouting\BundleInterface $bundle The bundle to register
-     * @return self
-     * @throws \MattFerris\HttpRouting\InvalidRouteCriteriaException If the
-     *    criteria for a specified route is invalid or missing
-     */
-    public function register(BundleInterface $bundle);
-
-    /**
      * Find a route that matches the HTTP request and then dispatch to request
      * to the route's defined action
      * 
