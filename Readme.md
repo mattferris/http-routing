@@ -6,18 +6,28 @@ HttpRouting
 
 An HTTP routing library for PHP
 
+Installable via composer:
+
+    composer require mattferris/http-routing
+
 Dispatcher
 ----------
 
-The dispatcher resolves requests by comparing the URI of the passed `Request` object against it's list of routes.
+The dispatcher resolves requests by comparing the passed `Request` object against it's list of routes.
 
     use MattFerris\HttpRouting\Dispatcher;
 
     $dispatcher = new Dispatcher();
 
-Calling `dispatch()` routes the request to an action, which, in turn, returns a response. This response is then returned by `dispatch()`. The response is an instance of `Response`. Unless you want to modify the current request, you can call `dispatch()` without arguments, however you can pass a custom request for processing. To send the response to the client, call `send()` on the returned response.
+Calling `dispatch()` routes the request to an action. The action is responsible for generating and returning a response. This response is then returned by `dispatch()`. The response is an instance of `ResponseInterface`. `dispatch()` will generate a request object from the environment if it isn't passed a request. To send the response to the client, call `send()` on the returned response.
 
+    // let the dispatcher generate the request
     $response = $dispatcher->dispatch();
+
+    // dispatch a custom request
+    $response = $dispatcher->dispatch($customRequest);
+
+    // send the response
     $response->send();
 
 Or, if you prefer a one-liner:
