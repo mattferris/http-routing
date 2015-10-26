@@ -4,35 +4,27 @@ HttpRouting
 [![Build Status](https://travis-ci.org/mattferris/http-routing.svg?branch=master)](https://travis-ci.org/mattferris/http-routing)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/2996f3e8-b7a9-424c-a656-939e98d07916/mini.png)](https://insight.sensiolabs.com/projects/2996f3e8-b7a9-424c-a656-939e98d07916)
 
-An HTTP routing library for PHP
+An PSR-7 compliant HTTP routing library for PHP
 
 Installable via composer:
 
     composer require mattferris/http-routing
 
+To use this library, you'll need to also install a PSR-7 compliant HTTP messaging library, [zendframework/zend-diactoros](https://github.com/zendframework/zend-diactoros) for example.
+
 Dispatcher
 ----------
 
-The dispatcher resolves requests by comparing the passed `Request` object against it's list of routes.
+The dispatcher resolves requests by comparing the passed instance `Psr\Http\Message\ServerRequestInterface` object against it's list of routes.
 
     use MattFerris\HttpRouting\Dispatcher;
 
-    $dispatcher = new Dispatcher();
+    $dispatcher = new Dispatcher($request);
 
-Calling `dispatch()` routes the request to an action. The action is responsible for generating and returning a response. This response is then returned by `dispatch()`. The response is an instance of `ResponseInterface`. `dispatch()` will generate a request object from the environment if it isn't passed a request. To send the response to the client, call `send()` on the returned response.
+Calling `dispatch()` routes the request to an action. The action is responsible for generating and returning a response. This response is then returned by `dispatch()`. The response is an instance of `Psr\Http\Message\ResponseInterface`. 
 
-    // let the dispatcher generate the request
-    $response = $dispatcher->dispatch();
-
-    // dispatch a custom request
-    $response = $dispatcher->dispatch($customRequest);
-
-    // send the response
-    $response->send();
-
-Or, if you prefer a one-liner:
-
-    $dispatcher->dispatch()->send();
+    // get a response
+    $response = $dispatcher->dispatch($request);
 
 Routing
 -------
@@ -93,7 +85,7 @@ You can define a 404 handler easily enough by defining the last route in the *ro
 Actions
 -------
 
-An action defines the code that actually processes the request and generates a response. The only requirement of an action is that it return an instance of `ResponseInterface`, an instance of `RequestInterface`, or nothing at all.
+An action defines the code that actually processes the request and generates a response. The only requirement of an action is that it return an instance of `ResponseInterface`, an instance of `ServerRequestInterface`, or nothing at all.
 
     // given these routes...
     $dispatcher
@@ -107,6 +99,7 @@ An action defines the code that actually processes the request and generates a r
         {
             ...
 
+            // Response must be an instance of Psr\Http\Message\ResponseInterface
             return new Response(
                 '{"bar":"'.$bar.'"}', 200, 'application/json'
             );
@@ -116,6 +109,7 @@ An action defines the code that actually processes the request and generates a r
         {
             ...
 
+            // Response must be an instance of Psr\Http\Message\ResponseInterface
             return new Response(
                 '{"status": "success"}', 200, 'application/json'
             );
@@ -124,7 +118,7 @@ An action defines the code that actually processes the request and generates a r
 
 ### Internal Redirects
 
-You can redirect a client with an HTTP 301 response (for example), which the browser then interprets and issues a new request to the specified URL. In some cases, you may want to simply re-evaluate a new request without returning anything to the client. This is possible by returning an instance of `RequestInterface` from the action.
+You can redirect a client with an HTTP 301 response (for example), which the browser then interprets and issues a new request to the specified URL. In some cases, you may want to simply re-evaluate a new request without returning anything to the client. This is possible by returning an instance of `ServerRequestInterface` from the action.
 
     public function someAction()
     {
@@ -141,27 +135,11 @@ When `Dispatcher` identifies the return value from the action as a new request, 
         error_log('received request: '.$request->getUri());
     });
 
-### Request Attributes
-
-When using internal redirects or *fall-through routes*, it can be useful to pass along information from one action to another. This can be done by setting attributes on the request object using `setAttribute()`.
-
-    public function getFooAction(RequestInterface $request)
-    {
-        $request->setAttribute('bar', 'baz');
-    }
-
-Other actions can then access this information via `getAttribute()`.
-
-    public function anotherAction(RequestInterface $request)
-    {
-        $bar = $request->getAttribute('bar');
-    }
-
 ### Argument Injection
 
 The routing section touched on how named parameters can be accessed via the arguments of your action, i.e. a pattern named `username` can be access via an argument name `$username`. This is done via injection, where the dependency injector matches the argument name to the parameter. In addition to parameters, your actions can access additional information via arguments, such as the current request object.
 
-    public function someAction(RequestInterface $request)
+    public function someAction(ServerRequestInterface $request)
     {
         ...
     }
