@@ -17,7 +17,7 @@ namespace MattFerris\HttpRouting;
 use MattFerris\Provider\ConsumerInterface;
 use MattFerris\Provider\ProviderInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
+use Psr\Http\Message\ResponseInterface;
 
 class Dispatcher implements DispatcherInterface, ConsumerInterface
 {
