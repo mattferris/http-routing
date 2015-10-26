@@ -16,6 +16,8 @@ namespace MattFerris\HttpRouting;
 
 use MattFerris\Provider\ConsumerInterface;
 use MattFerris\Provider\ProviderInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 
 class Dispatcher implements DispatcherInterface, ConsumerInterface
 {
@@ -225,22 +227,20 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * Find a route that matches the HTTP request and then dispatch to request
      * to the route's defined action
      * 
-     * @param \MattFerris\HttpRouting\RequestInterface $request The incoming request
-     * @return \MattFerris\HttpRouting\ResponseInterface|null The response
+     * @param \Psr\Http\Message\SererRequestInterface $request The incoming request
+     * @return \Psr\Http\Message\ResponseInterface|null The response
      *     returned by the last-called action, or null if no response returned or
      *     route was matched
      */
-    public function dispatch(RequestInterface $request = null)
+    public function dispatch(ServerRequestInterface $request)
     {
-        if ($request === null) {
-            $request = new Request();
-        }
-
         $response = null;
 
         DomainEvents::dispatch(new ReceivedRequestEvent($request));
 
         $nroutes = count($this->routes);
+        $method = $request->getMethod();
+        $path = $request->getUri()->getPath();
         for ($i = 0; $i<$nroutes; $i++) {
             $route = $this->routes[$i];
 
@@ -248,19 +248,14 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
             $args = $tmpargs = array();
 
             // if a specified method doesn't match, skip to the next route
-            if ($route->hasMethod() && !$route->matchMethod($request->getMethod(), $args)) {
+            if ($route->hasMethod() && !$route->matchMethod($method, $args)) {
                 continue;
             }
 
             // if any specified headers don't match, skip to the next route
             if ($route->hasHeaders()) {
                 foreach ($route->getHeaderNames() as $header) {
-                    if (method_exists($request, 'get'.$header)) {
-                        $method = 'get'.$header;
-                        if (!$route->matchHeader($header, $request->$method(), $tmpargs)) {
-                            continue 2;
-                        }
-                    } elseif (!$route->matchHeader($header, $request->getHeader($header), $tmpargs)) {
+                    if (!$request->hasHeader($header) || !$route->matchHeader($header, $request->getHeaderLine($header), $tmpargs)) {
                         continue 2;
                     }
                     $args = array_merge($tmpargs);
@@ -268,7 +263,7 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
             }
 
             // if the URI doesn't match, skip to the next route
-            if (!$route->matchUri($request->getUri(), $tmpargs)) {
+            if (!$route->matchUri($path, $tmpargs)) {
                 continue;
             }
             $args = array_merge($args, $tmpargs);
@@ -296,10 +291,12 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
             DomainEvents::dispatch(new DispatchedRequestEvent($request, $route, $args));
 
             // if we get a request returned, dispatch it
-            if ($response instanceof RequestInterface) {
+            if ($response instanceof ServerRequestInterface) {
                 $request = $response;
-                $response = null;
+                $method = $request->getMethod();
+                $path = $request->getUri()->getPath();
                 $i = 0;
+                $response = null;
             } elseif ($response instanceof ResponseInterface) {
                 break;
             }

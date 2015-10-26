@@ -53,10 +53,16 @@ class SimpleRoute implements RouteInterface
             throw new \InvalidArgumentException('$method expects non-empty string or null');
         }
 
+        // normalize headers
+        $normalized = [];
+        foreach ($headers as $h => $v) {
+            $normalized[strtolower($h)] = $v;
+        }
+
         $this->uri = $uri;
         $this->action = $action;
         $this->method = $method;
-        $this->headers = $headers;
+        $this->headers = $normalized;
     }
 
     /**
@@ -158,11 +164,12 @@ class SimpleRoute implements RouteInterface
      */
     public function matchHeader($header, $value, array &$matches = array())
     {
-        foreach ($this->headers as $h => $v) {
-            if (strcasecmp($h, $header) === 0 && strcmp($v, $value) === 0) {
-                return true;
-            }
+        // normalize
+        $header = strtolower($header);
+        if (isset($this->headers[$header]) && $this->headers[$header] === $value) {
+            return true;
         }
+
         return false;
     }
 }

@@ -34,13 +34,15 @@ class RegexRouteTest extends PHPUnit_Framework_TestCase
 
     public function testMatchHeader()
     {
-        $route = new RegexRoute('^/foo', function () {}, null, array('Host'=>'foo'));
+        $args = [];
+        $route = new RegexRoute( '^/foo', function () {}, null, ['Host'=>'(?P<header>foo)']);
 
         $this->assertTrue($route->hasHeaders());
-        $this->assertEquals($route->getHeaderNames(), array('Host'));
+        $this->assertEquals($route->getHeaderNames(), ['host']);
         $this->assertFalse($route->matchHeader('Host', 'bar'));
         $this->assertTrue($route->matchHeader('Host', 'foo'));
-        $this->assertTrue($route->matchHeader('host', 'foo'));
+        $this->assertTrue($route->matchHeader('host', 'foo', $args));
+        $this->assertEquals($args['header'], 'foo');
     }
 }
 

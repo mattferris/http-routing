@@ -14,19 +14,21 @@
 
 namespace MattFerris\HttpRouting;
 
+use Psr\Http\Message\ServerRequestInterface;
+
 class AbstractRequestEvent extends DomainEvent
 {
     /**
-     * @var \MattFerris\HttpRouting\RequestInterface The request the event was
+     * @var \Psr\Http\Message\ServerRequestInterface The request the event was
      *     dispatched for
      */
     protected $request;
 
     /**
-     * @param \MattFerris\HttpRouting\RequestInterface $request The request the
+     * @param \Psr\Http\Message\ServerRequestInterface $request The request the
      *     event was dispatched for
      */
-    public function __construct(RequestInterface $request)
+    public function __construct(ServerRequestInterface $request)
     {
         $this->request = $request;
     }
@@ -34,7 +36,7 @@ class AbstractRequestEvent extends DomainEvent
     /**
      * Return the request the event was dispatched for
      *
-     * @return \MattFerris\HttpRouting\RequestInterface The request the event
+     * @return \Psr\Http\Message\ServerRequestInterface The request the event
      *    was dispatched for
      */
     public function getRequest()

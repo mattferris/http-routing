@@ -14,6 +14,8 @@
 
 namespace MattFerris\HttpRouting; 
 
+use Psr\Http\Message\ServerRequestInterface;
+
 interface DispatcherInterface
 {
     /**
@@ -129,11 +131,11 @@ interface DispatcherInterface
      * Find a route that matches the HTTP request and then dispatch to request
      * to the route's defined action
      * 
-     * @param \MattFerris\HttpRouting\RequestInterface $request The incoming request
-     * @return \MattFerris\HttpRouting\ResponseInterface|null The response
+     * @param \Psr\Http\Message\ServerRequestInterface $request The incoming request
+     * @return \Psr\Http\Message\ResponseInterface|null The response
      *     returned by the last-called action, or null if no response returned or
      *     route was matched
      */
-    public function dispatch(RequestInterface $request = null);
+    public function dispatch(ServerRequestInterface $request);
 }
 

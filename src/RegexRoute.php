@@ -55,10 +55,10 @@ class RegexRoute extends SimpleRoute
      */
     public function matchHeader($header, $value, array &$matches = array())
     {
-        foreach ($this->headers as $h => $v) {
-            if (preg_match('!'.$v.'!', $value, $matches)) {
-                return true;
-            }
+        // normalize
+        $header = strtolower($header);
+        if (isset($this->headers[$header]) && preg_match('!'.$this->headers[$header].'!', $value, $matches)) {
+            return true;
         }
         return false;
     }

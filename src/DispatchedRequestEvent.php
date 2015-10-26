@@ -14,6 +14,8 @@
 
 namespace MattFerris\HttpRouting;
 
+use Psr\Http\Message\ServerRequestInterface;
+
 class DispatchedRequestEvent extends AbstractRequestEvent
 {
     /**
@@ -28,13 +30,13 @@ class DispatchedRequestEvent extends AbstractRequestEvent
     protected $args;
 
     /**
-     * @param \MattFerris\HttpRouting\RequestInterface $request The request the
+     * @param \Psr\Http\Message\ServerRequestInterface $request The request the
      *     event was dispatched for
      * @param \MattFerris\HttpRouting\RouteInterface $route The route that the
      *     request matched
      * @param array $args Any extra arguments passed to the event
      */
-    public function __construct(RequestInterface $request, RouteInterface $route, array $args)
+    public function __construct(ServerRequestInterface $request, RouteInterface $route, array $args)
     {
         $this->route = $route;
         $this->args = $args;
