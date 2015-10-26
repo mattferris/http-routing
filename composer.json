@@ -11,7 +11,7 @@
     "require": {
         "mattferris/di": "~0.3",
         "mattferris/events": "~0.2",
-        "mattferris/provider": "0.1",
+        "mattferris/provider": "0.2",
         "psr/http-message": "^1.0"
     },
     "require-dev": {
