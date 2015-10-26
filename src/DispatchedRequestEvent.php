@@ -1,7 +1,7 @@
 <?php
 
 /**
- * HttpRouting - An HTTP routing dispatcher
+ * Http Routing - An HTTP routing dispatcher
  * www.bueller.ca/http-routing
  *
  * DispatchedRequestEvent.php
@@ -12,14 +12,14 @@
  * www.bueller.ca/http-routing/license
  */
 
-namespace MattFerris\HttpRouting;
+namespace MattFerris\Http\Routing;
 
 use Psr\Http\Message\ServerRequestInterface;
 
 class DispatchedRequestEvent extends AbstractRequestEvent
 {
     /**
-     * @var \MattFerris\HttpRouting\RouteInterface The route the event was
+     * @var \MattFerris\Http\Routing\RouteInterface The route the event was
      *     dispatched for
      */
     protected $route;
@@ -44,7 +44,7 @@ class DispatchedRequestEvent extends AbstractRequestEvent
     }
 
     /**
-     * @return \MattFerris\HttpRouting\RouteInterface The route for the event
+     * @return \MattFerris\Http\Routing\RouteInterface The route for the event
      */
     public function getRoute()
     {

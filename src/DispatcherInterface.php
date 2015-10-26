@@ -1,7 +1,7 @@
 <?php
 
 /**
- * HttpRouting - An HTTP routing dispatcher
+ * Http Routing - An HTTP routing dispatcher
  * www.bueller.ca/http-routing
  *
  * DispatcherInterface.php
@@ -12,7 +12,7 @@
  * www.bueller.ca/http-routing/license
  */
 
-namespace MattFerris\HttpRouting; 
+namespace MattFerris\Http\Routing; 
 
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -21,7 +21,7 @@ interface DispatcherInterface
     /**
      * Add a route object to the dispatcher
      *
-     * @param \MattFerris\HttpRouting\RouteInterface $route The route to add
+     * @param \MattFerris\Http\Routing\RouteInterface $route The route to add
      * @return self
      */
     public function add(RouteInterface $route);
@@ -29,7 +29,7 @@ interface DispatcherInterface
     /**
      * Insert a route object at a specific array index
      *
-     * @param \MattFerris\HttpRouting\RouteInterface $route The route to add
+     * @param \MattFerris\Http\Routing\RouteInterface $route The route to add
      * @param int $position The array index to insert the route in
      * @return self
      * @throws \InvalidArgumentException If $position doesn't exist

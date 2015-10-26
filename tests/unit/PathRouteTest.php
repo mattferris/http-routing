@@ -1,6 +1,6 @@
 <?php
 
-use MattFerris\HttpRouting\PathRoute;
+use MattFerris\Http\Routing\PathRoute;
 
 class PathRouteTest extends PHPUnit_Framework_TestCase
 {

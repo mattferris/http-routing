@@ -1,7 +1,7 @@
 <?php
 
 /**
- * HttpRouting - An HTTP routing dispatcher
+ * Http Routing - An HTTP routing dispatcher
  * www.bueller.ca/http-routing
  *
  * Dispatcher.php
@@ -12,7 +12,7 @@
  * www.bueller.ca/http-routing/license
  */
 
-namespace MattFerris\HttpRouting; 
+namespace MattFerris\Http\Routing; 
 
 use MattFerris\Provider\ConsumerInterface;
 use MattFerris\Provider\ProviderInterface;
@@ -22,14 +22,14 @@ use Psr\Http\Message\ResponseInterface;
 class Dispatcher implements DispatcherInterface, ConsumerInterface
 {
     /**
-     * @var \MattFerris\HttpRouting\RouteInterface[] Routes added to the dispatcher
+     * @var \MattFerris\Http\Routing\RouteInterface[] Routes added to the dispatcher
      */
     protected $routes = array();
 
     /**
      * @var string The class name of the default route type
      */
-    protected $defaultRouteType = '\\MattFerris\\HttpRouting\\PathRoute';
+    protected $defaultRouteType = '\\MattFerris\\Http\\Routing\\PathRoute';
 
     /**
      * @var \MattFerris\Di\ContainerInterface The dependency injector instance
@@ -65,7 +65,7 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
     /**
      * Add a route object to the dispatcher
      *
-     * @param \MattFerris\HttpRouting\RouteInterface $route The route to add
+     * @param \MattFerris\Http\Routing\RouteInterface $route The route to add
      * @return self
      */
     public function add(RouteInterface $route)
@@ -77,7 +77,7 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
     /**
      * Insert a route object at a specific array index
      *
-     * @param \MattFerris\HttpRouting\RouteInterface $route The route to add
+     * @param \MattFerris\Http\Routing\RouteInterface $route The route to add
      * @param int $position The array index to insert the route in
      * @return self
      * @throws \InvalidArgumentException If $position doesn't exist

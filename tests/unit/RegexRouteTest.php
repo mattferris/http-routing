@@ -1,6 +1,6 @@
 <?php
 
-use MattFerris\HttpRouting\RegexRoute;
+use MattFerris\Http\Routing\RegexRoute;
 
 class RegexRouteTest extends PHPUnit_Framework_TestCase
 {

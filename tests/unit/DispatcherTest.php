@@ -1,9 +1,9 @@
 <?php
 
-use MattFerris\HttpRouting\DomainEvent;
-use MattFerris\HttpRouting\DomainEvents;
-use MattFerris\HttpRouting\Dispatcher;
-use MattFerris\HttpRouting\SimpleRoute;
+use MattFerris\Http\Routing\DomainEvent;
+use MattFerris\Http\Routing\DomainEvents;
+use MattFerris\Http\Routing\Dispatcher;
+use MattFerris\Http\Routing\SimpleRoute;
 use Psr\Http\Message\UriInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;

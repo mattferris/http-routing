@@ -4,8 +4,7 @@
     "license": "BSD-2-Clause",
     "autoload": {
         "psr-4": {
-            "MattFerris\\HttpRouting\\": "src/",
-            "MattFerris\\HttpRouting\\Demo\\": "demo/Controllers/"
+            "MattFerris\\Http\\Routing\\": "src/"
         }
     },
     "require": {

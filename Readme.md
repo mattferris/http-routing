@@ -1,5 +1,5 @@
-HttpRouting
-===========
+HTTP Routing
+============
 
 [![Build Status](https://travis-ci.org/mattferris/http-routing.svg?branch=master)](https://travis-ci.org/mattferris/http-routing)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/2996f3e8-b7a9-424c-a656-939e98d07916/mini.png)](https://insight.sensiolabs.com/projects/2996f3e8-b7a9-424c-a656-939e98d07916)
@@ -17,7 +17,7 @@ Dispatcher
 
 The dispatcher resolves requests by comparing the passed instance `Psr\Http\Message\ServerRequestInterface` against it's list of routes.
 
-    use MattFerris\HttpRouting\Dispatcher;
+    use MattFerris\Http\Routing\Dispatcher;
 
     $dispatcher = new Dispatcher($request);
 
@@ -143,11 +143,11 @@ For more on dependency injection, checkout [mattferris/di](http://bueller.ca/di)
 Bundles
 -------
 
-Within your application, you can define 'bundles', which are a collection of routes that parts of your application can handle. Bundles can be registered with a dispatcher via `register()`. Bundles are just a plain class implementing `MattFerris\HttpRouting\BundleInterface`, and must define a single method, `provides()`, which accepts an instance of `Dispatcher` as it's only argument.
+Within your application, you can define 'bundles', which are a collection of routes that parts of your application can handle. Bundles can be registered with a dispatcher via `register()`. Bundles are just a plain class implementing `MattFerris\Http\Routing\BundleInterface`, and must define a single method, `provides()`, which accepts an instance of `Dispatcher` as it's only argument.
 
-    class MyAppBundle implements \MattFerris\HttpRouting\BundleInterface
+    class MyAppBundle implements \MattFerris\Http\Routing\BundleInterface
     {
-        public function provides(\MattFerris\HttpRouting\Dispatcher $dispatcher)
+        public function provides(\MattFerris\Http\Routing\Dispatcher $dispatcher)
         {
             $dispatcher->get('/users/{username}', 'Controller::someAction', ['Host => 'example.com']);
         }
@@ -164,7 +164,7 @@ Advanced Routing
 
 Internally, routes are represented as objects implementing `RouteInterface`. When adding routes using the helper methods, the `Dispatcher` creates route objects. By default, these route objects are all `PathRoute` instances, as `PathRoute` is the default type. This can be changed by calling `Dispatcher::setDefaultRouteType()`. Two other route types are included: `SimpleRoute` and `RegexRoute`.
 
-    $dispatcher->setDefaultRouteType('\MattFerris\HttpRouting\RegexRoute');
+    $dispatcher->setDefaultRouteType('\MattFerris\Http\Routing\RegexRoute');
 
 After setting the new default route type, all helper methods will then create instances of the new route type. This can be used to implement your own route type.
 

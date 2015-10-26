@@ -1,6 +1,6 @@
 <?php
 
-use MattFerris\HttpRouting\SimpleRoute;
+use MattFerris\Http\Routing\SimpleRoute;
 
 class SimpleRouteTest extends PHPUnit_Framework_TestCase
 {
