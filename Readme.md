@@ -4,18 +4,18 @@ HttpRouting
 [![Build Status](https://travis-ci.org/mattferris/http-routing.svg?branch=master)](https://travis-ci.org/mattferris/http-routing)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/2996f3e8-b7a9-424c-a656-939e98d07916/mini.png)](https://insight.sensiolabs.com/projects/2996f3e8-b7a9-424c-a656-939e98d07916)
 
-An PSR-7 compliant HTTP routing library for PHP
+A PSR-7 compliant HTTP routing library for PHP
 
 Installable via composer:
 
     composer require mattferris/http-routing
 
-To use this library, you'll need to also install a PSR-7 compliant HTTP messaging library, [zendframework/zend-diactoros](https://github.com/zendframework/zend-diactoros) for example.
+To use this library, you'll need to also install a PSR-7 compliant HTTP messaging library like [zendframework/zend-diactoros](https://github.com/zendframework/zend-diactoros).
 
 Dispatcher
 ----------
 
-The dispatcher resolves requests by comparing the passed instance `Psr\Http\Message\ServerRequestInterface` object against it's list of routes.
+The dispatcher resolves requests by comparing the passed instance `Psr\Http\Message\ServerRequestInterface` against it's list of routes.
 
     use MattFerris\HttpRouting\Dispatcher;
 
@@ -35,7 +35,7 @@ Routes can be added a number of ways. A simple method is by using the helper met
 
     // handle requests for GET /foo with a closure
     $dispatcher->get('/foo', function () {
-        return new Response('response to GET /foo');
+        return $response;
     });
 
     // handle requests for POST /foo with the fooAction() method on the Controller class
@@ -54,7 +54,7 @@ All helper methods also support a third parameter for matching HTTP headers. The
 
 ### Capturing Parameters
 
-You can capture parts of the URI using named parameters.For example, to capture usernames in the URI `/users/joe`, where `joe` can be any username, you could do the following.
+You can capture parts of the URI using named parameters. For example, to capture usernames in the URI `/users/joe`, where `joe` can be any username, you could do the following.
 
     $dispatcher->get('/users/{username}', 'Controller::fooAction');
 
@@ -79,13 +79,13 @@ Multiple parameters can be captured and will be passed to the action in the same
 You can define a 404 handler easily enough by defining the last route in the *route stack* with generic criteria, and setting the action to a piece of code that can generate an approriate response.
 
     $dispatcher->any('/', function () {
-        return new Response('not found', 404);
+        return $error404Response;
     });
 
 Actions
 -------
 
-An action defines the code that actually processes the request and generates a response. The only requirement of an action is that it return an instance of `ResponseInterface`, an instance of `ServerRequestInterface`, or nothing at all.
+An action defines the code that actually processes the request and generates a response. The only requirement of an action is that it return an instance of `Psr\Http\Message\ResponseInterface`, an instance of `Psr\Http\Message\ServerRequestInterface`, or nothing at all.
 
     // given these routes...
     $dispatcher
@@ -99,30 +99,24 @@ An action defines the code that actually processes the request and generates a r
         {
             ...
 
-            // Response must be an instance of Psr\Http\Message\ResponseInterface
-            return new Response(
-                '{"bar":"'.$bar.'"}', 200, 'application/json'
-            );
+            return $response;
         }
 
         public function postFooAction()
         {
             ...
 
-            // Response must be an instance of Psr\Http\Message\ResponseInterface
-            return new Response(
-                '{"status": "success"}', 200, 'application/json'
-            );
+            return $response;
         }
     }
 
 ### Internal Redirects
 
-You can redirect a client with an HTTP 301 response (for example), which the browser then interprets and issues a new request to the specified URL. In some cases, you may want to simply re-evaluate a new request without returning anything to the client. This is possible by returning an instance of `ServerRequestInterface` from the action.
+You can redirect a client with an HTTP 301 response (for example), which the browser then interprets and issues a new request to the specified URL. In some cases, you may want to simply re-evaluate a new request without returning anything to the client. This is possible by returning an instance of `Psr\Http\Message\ServerRequestInterface` from the action.
 
     public function someAction()
     {
-        return new Request();
+        return $request;
     }
 
 When `Dispatcher` identifies the return value from the action as a new request, it calls `dispatch()` again and passes the new request as an argument. The new request is processed exactly the same as the original.
@@ -139,7 +133,7 @@ When `Dispatcher` identifies the return value from the action as a new request, 
 
 The routing section touched on how named parameters can be accessed via the arguments of your action, i.e. a pattern named `username` can be access via an argument name `$username`. This is done via injection, where the dependency injector matches the argument name to the parameter. In addition to parameters, your actions can access additional information via arguments, such as the current request object.
 
-    public function someAction(ServerRequestInterface $request)
+    public function someAction(\Psr\Http\Message\ServerRequestInterface $request)
     {
         ...
     }
@@ -149,11 +143,11 @@ For more on dependency injection, checkout [mattferris/di](http://bueller.ca/di)
 Bundles
 -------
 
-Within your application, you can define 'bundles', which are a collection of routes that parts of your application can handle. Bundles can be registered with a dispatcher via `register()`. Bundles are just a plain class implementing `BundleInterface`, and must define a single method, `provides()`, which accepts an instance of `Dispatcher` as it's only argument.
+Within your application, you can define 'bundles', which are a collection of routes that parts of your application can handle. Bundles can be registered with a dispatcher via `register()`. Bundles are just a plain class implementing `MattFerris\HttpRouting\BundleInterface`, and must define a single method, `provides()`, which accepts an instance of `Dispatcher` as it's only argument.
 
     class MyAppBundle implements \MattFerris\HttpRouting\BundleInterface
     {
-        public function provides(ConsumerInterface $dispatcher)
+        public function provides(\MattFerris\HttpRouting\Dispatcher $dispatcher)
         {
             $dispatcher->get('/users/{username}', 'Controller::someAction', ['Host => 'example.com']);
         }
