@@ -572,11 +572,11 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         // test retrieving reverse route
         $dispatcher->get('/foo', function(){}, [], 'foo');
-        $this->assertEquals($dispatcher->reverse('foo'), '/foo');
+        $this->assertEquals($dispatcher->generate('foo'), '/foo');
 
         // test reverse route with parameters
         $dispatcher->get('/bar/{baz}', function(){}, [], 'bar');
-        $this->assertEquals($dispatcher->reverse('bar', ['baz' => 'test']), '/bar/test');
+        $this->assertEquals($dispatcher->generate('bar', ['baz' => 'test']), '/bar/test');
     }
 
     /**
@@ -601,7 +601,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         // test getting non-existent named route
         $this->setExpectedException('MattFerris\Http\Routing\NamedRouteDoesntExistException', 'named route "baz" doesn\'t exist');
-        $dispatcher->reverse('baz');
+        $dispatcher->generate('baz');
     }
 }
 

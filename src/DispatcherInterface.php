@@ -149,7 +149,7 @@ interface DispatcherInterface
      * @throws \InvalidArgumentException The route's required parameters haven't
      *     been specified
      */
-    public function reverse($name, array $params = []);
+    public function generate($name, array $params = []);
 
     /**
      * Find a route that matches the HTTP request and then dispatch to request

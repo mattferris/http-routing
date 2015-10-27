@@ -284,7 +284,7 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * @throws \InvalidArgumentException The route's required parameters haven't
      *     been specified, or $name isn't a string or is empty
      */
-    public function reverse($name, array $params = [])
+    public function generate($name, array $params = [])
     {
         if (!is_string($name) || empty($name)) {
             throw new \InvalidArgumentException('$name expects non-empty string');
