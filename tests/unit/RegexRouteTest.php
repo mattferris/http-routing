@@ -44,5 +44,11 @@ class RegexRouteTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($route->matchHeader('host', 'foo', $args));
         $this->assertEquals($args['header'], 'foo');
     }
+
+    public function testGenerateUri()
+    {
+        $route = new RegexRoute('^/foo$', function () {});
+        $this->assertEquals($route->generateUri(), '/foo');
+    }
 }
 

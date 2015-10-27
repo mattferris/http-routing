@@ -562,6 +562,60 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         $this->assertTrue($foo);
     }
+
+    /**
+     * @depends testAddRouteViaRoute
+     */
+    public function testReverse()
+    {
+        $dispatcher = new Dispatcher();
+
+        // test retrieving reverse route
+        $dispatcher->get('/foo', function(){}, [], 'foo');
+        $this->assertEquals($dispatcher->reverse('foo'), '/foo');
+
+        // test reverse route with parameters
+        $dispatcher->get('/bar/{baz}', function(){}, [], 'bar');
+        $this->assertEquals($dispatcher->reverse('bar', ['baz' => 'test']), '/bar/test');
+    }
+
+    /**
+     * @depends testReverse
+     */
+    public function testAddDuplicateNamedRoute()
+    {
+        $dispatcher = new Dispatcher();
+
+        // test adding duplicate named route
+        $this->setExpectedException('MattFerris\Http\Routing\DuplicateNamedRouteException', 'named route "foo" already exists');
+        $dispatcher->get('/foo', function(){}, [], 'foo');
+        $dispatcher->get('/foo2', function(){}, [], 'foo');
+    }
+
+    /**
+     * @depends testReverse
+     */
+    public function testReverseForNonExistentNameRoute()
+    {
+        $dispatcher = new Dispatcher();
+
+        // test getting non-existent named route
+        $this->setExpectedException('MattFerris\Http\Routing\NamedRouteDoesntExistException', 'named route "baz" doesn\'t exist');
+        $dispatcher->reverse('baz');
+    }
+
+    /**
+     * @depends testReverse
+     */
+    public function testReverseWithMissingParameters()
+    {
+        $dispatcher = new Dispatcher();
+
+        // test getting named route without specifying required parameters
+        $this->setExpectedException('InvalidArgumentException', 'required named route parameter "baz" not specified');
+        $dispatcher->get('/bar/{baz}', function(){}, [], 'bar');
+        $dispatcher->reverse('bar');
+    }
 }
 
 class DispatcherTest_Stub

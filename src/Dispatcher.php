@@ -24,7 +24,12 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
     /**
      * @var \MattFerris\Http\Routing\RouteInterface[] Routes added to the dispatcher
      */
-    protected $routes = array();
+    protected $routes = [];
+
+    /**
+     * @var \MattFerris\Http\Routing\RouteInterface[string] Named routes
+     */
+    protected $namedRoutes = [];
 
     /**
      * @var string The class name of the default route type
@@ -63,14 +68,42 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
     }
 
     /**
+     * Add a named route
+     *
+     * @param \MattFerris\Http\Routing\RouteInterface $route The route
+     * @param string $name The route name
+     * @throws \InvalidArgumentException If $name isn't a string or is empty
+     * @throws \MattFerris\Http\Routing\DuplicateNamedRouteException The route
+     *     name already exists
+     */
+    protected function addNamedRoute(RouteInterface $route, $name)
+    {
+        if (!is_string($name) || empty($name)) {
+            throw new \InvalidArgumentException('$name expects non-empty string');
+        }
+
+        if (isset($this->namedRoutes[$name])) {
+            throw new DuplicateNamedRouteException('named route "'.$name.'" already exists');
+        }
+
+        $this->namedRoutes[$name] = $route;
+    }
+
+    /**
      * Add a route object to the dispatcher
      *
      * @param \MattFerris\Http\Routing\RouteInterface $route The route to add
+     * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function add(RouteInterface $route)
+    public function add(RouteInterface $route, $name = null)
     {
         $this->routes[] = $route;
+
+        if (!is_null($name)) {
+            $this->addNamedRoute($route, $name);
+        }
+
         return $this;
     }
 
@@ -79,15 +112,22 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      *
      * @param \MattFerris\Http\Routing\RouteInterface $route The route to add
      * @param int $position The array index to insert the route in
+     * @param string $name The name of the route to get the URI for
      * @return self
      * @throws \InvalidArgumentException If $position doesn't exist
      */
-    public function insert(RouteInterface $route, $position)
+    public function insert(RouteInterface $route, $position, $name = null)
     {
         if (!is_int($position) || $position < 0 || $position > count($position)) {
             throw new \InvalidArgumentException('$position out of range');
         }
+
         array_splice($this->routes, $position, 0, array($route));
+
+        if (!is_null($name)) {
+            $this->addNamedRoute($route, $name);
+        }
+
         return $this;
     }
 
@@ -98,12 +138,14 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * @param callable $action The action to dispatch the request to
      * @param string $method The HTTP method to match
      * @param string[string] $headers Any HTTP headers to match
+     * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function route($uri, callable $action, $method, array $headers)
+    public function route($uri, callable $action, $method, array $headers, $name = null)
     {
         $class = $this->defaultRouteType;
-        return $this->add(new $class($uri, $action, $method, $headers));
+        $this->add(new $class($uri, $action, $method, $headers), $name);
+        return $this;
     }
 
     /**
@@ -112,11 +154,12 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * @param string $uri The URI to match
      * @param callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
+     * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function any($uri, callable $action, array $headers = array())
+    public function any($uri, callable $action, array $headers = [], $name = null)
     {
-        return $this->route($uri, $action, null, $headers);
+        return $this->route($uri, $action, null, $headers, $name);
     }
 
     /**
@@ -125,11 +168,12 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * @param string $uri The URI to match
      * @param callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
+     * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function get($uri, callable $action, array $headers = array())
+    public function get($uri, callable $action, array $headers = [], $name = null)
     {
-        return $this->route($uri, $action, 'GET', $headers);
+        return $this->route($uri, $action, 'GET', $headers, $name);
     }
 
     /**
@@ -138,11 +182,12 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * @param string $uri The URI to match
      * @param callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
+     * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function post($uri, callable $action, array $headers = array())
+    public function post($uri, callable $action, array $headers = [], $name = null)
     {
-        return $this->route($uri, $action, 'POST', $headers);
+        return $this->route($uri, $action, 'POST', $headers, $name);
     }
 
     /**
@@ -151,11 +196,12 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * @param string $uri The URI to match
      * @param callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
+     * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function put($uri, callable $action, array $headers = array())
+    public function put($uri, callable $action, array $headers = [], $name = null)
     {
-        return $this->route($uri, $action, 'PUT', $headers);
+        return $this->route($uri, $action, 'PUT', $headers, $name);
     }
 
     /**
@@ -164,11 +210,12 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * @param string $uri The URI to match
      * @param callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
+     * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function delete($uri, callable $action, array $headers = array())
+    public function delete($uri, callable $action, array $headers = [], $name = null)
     {
-        return $this->route($uri, $action, 'DELETE', $headers);
+        return $this->route($uri, $action, 'DELETE', $headers, $name);
     }
 
     /**
@@ -177,11 +224,12 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * @param string $uri The URI to match
      * @param callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
+     * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function head($uri, callable $action, array $headers = array())
+    public function head($uri, callable $action, array $headers = [], $name = null)
     {
-        return $this->route($uri, $action, 'HEAD', $headers);
+        return $this->route($uri, $action, 'HEAD', $headers, $name);
     }
 
     /**
@@ -190,11 +238,12 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * @param string $uri The URI to match
      * @param callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
+     * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function options($uri, callable $action, array $headers = array())
+    public function options($uri, callable $action, array $headers = [], $name = null)
     {
-        return $this->route($uri, $action, 'OPTIONS', $headers);
+        return $this->route($uri, $action, 'OPTIONS', $headers, $name);
     }
 
     /**
@@ -203,11 +252,12 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * @param string $uri The URI to match
      * @param callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
+     * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function trace($uri, callable $action, array $headers = array())
+    public function trace($uri, callable $action, array $headers = [], $name = null)
     {
-        return $this->route($uri, $action, 'TRACE', $headers);
+        return $this->route($uri, $action, 'TRACE', $headers, $name);
     }
 
     /**
@@ -221,6 +271,30 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
     {
         $bundle->provides($this);  
         return $this;
+    }
+
+    /**
+     * Get a matching URI for a named route
+     *
+     * @param string $name The name of the route to get the URI for
+     * @param array[string] $params Any parameters for the URI
+     * @return string The matching URI
+     * @throws \MattFerris\Http\Routing\NamedRouteDoesntExistException The route
+     *     name hasn't been defined
+     * @throws \InvalidArgumentException The route's required parameters haven't
+     *     been specified, or $name isn't a string or is empty
+     */
+    public function reverse($name, array $params = [])
+    {
+        if (!is_string($name) || empty($name)) {
+            throw new \InvalidArgumentException('$name expects non-empty string');
+        }
+
+        if (!isset($this->namedRoutes[$name])) {
+            throw new NamedRouteDoesntExistException('named route "'.$name.'" doesn\'t exist');
+        }
+
+        return $this->namedRoutes[$name]->generateUri($params);
     }
 
     /**

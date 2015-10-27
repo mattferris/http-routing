@@ -41,5 +41,35 @@ class PathRoute extends RegexRoute
 
         parent::__construct($uri, $action, $method, $headers);
     }
+
+    /**
+     * Return a URI that would match the route
+     *
+     * @param array $params Values for route parameters
+     * @return string
+     * @throw \InvalidArgumentException Required parameters haven't been
+     *     specified
+     */
+    public function generateUri(array $params = [])
+    {
+        $uri = $this->uri;
+
+        if (strpos($uri, '^') === 0) {
+            $uri = substr($this->uri, 1);
+        }
+
+        $matches = [];
+        if (preg_match_all('/\(\?P\<([a-zA-Z_][a-zA-Z0-9_]+)\>/', $uri, $matches)) {
+            foreach ($matches[1] as $param) {
+                if (!isset($params[$param])) {
+                    throw new \InvalidArgumentException('required named route parameter "'.$param.'" not specified');
+                }
+
+                $uri = preg_replace('/\(\?P\<'.$param.'\>\[\^\/\?\]\+\)/', $params[$param], $uri);
+            }
+        }
+
+        return $uri;
+    }
 }
 

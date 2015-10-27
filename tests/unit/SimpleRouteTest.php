@@ -36,5 +36,11 @@ class SimpleRouteTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($route->matchHeader('Host', 'foo'));
         $this->assertTrue($route->matchHeader('host', 'foo'));
     }
+
+    public function testGenerateUri()
+    {
+        $route = new SimpleRoute('/foo', function () {});
+        $this->assertEquals($route->generateUri(), '/foo');
+    }
 }
 

@@ -17,6 +17,35 @@ namespace MattFerris\Http\Routing;
 class RegexRoute extends SimpleRoute
 {
     /**
+     * Return a URI that would match the route
+     *
+     * @param array $params Values for route parameters
+     * @return string
+     * @throw \InvalidArgumentException Required parameters haven't been
+     *     specified
+     */
+    public function generateUri(array $params = [])
+    {
+        $uri = $this->uri;
+
+        $uri = ltrim($uri, '^');
+        $uri = rtrim($uri, '$'); 
+
+        $matches = [];
+        if (preg_match_all('/\(\?P\<([a-zA-Z_][a-zA-Z0-9_]+)\>\[\^\/\]+\)/', $uri, $matches)) {
+            foreach ($matches[1] as $param) {
+                if (!isset($params[$param])) {
+                    throw new \InvalidArgumentException('required named route parameter "'.$param.'" not specified');
+                }
+
+                $uri = preg_replace('/\(\?P\<'.$param.'\>\[\^\/\]\+\)/g', $pramas[$param], $uri);
+            }
+        }
+
+        return $uri;
+    }
+
+    /**
      * Match the supplied against the routes URI
      *
      * @param string $uri The URI to match

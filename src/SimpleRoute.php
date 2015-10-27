@@ -89,6 +89,19 @@ class SimpleRoute implements RouteInterface
     }
 
     /**
+     * Return a URI that would match the route
+     *
+     * @param array $params Values for route parameters
+     * @return string
+     * @throw \InvalidArgumentException Required parameters haven't been
+     *     specified
+     */
+    public function generateUri(array $params = [])
+    {
+        return $this->uri;
+    }
+
+    /**
      * Check the route has HTTP method criteria
      *
      * @return bool True if method criteria exists, otherwise false
