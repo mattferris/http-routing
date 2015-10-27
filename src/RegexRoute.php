@@ -51,8 +51,18 @@ class RegexRoute extends SimpleRoute
         $pattern = $this->generateParamRegex('([a-zA-Z_][a-zA-Z0-9_]+)');
         if (preg_match_all($pattern, $uri, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
-                // search sub pattern values to find one that matched something
-                array_shift($match); // first value is the pattern
+
+                /*
+                 * $matches is an array containing arrays for each $match in the
+                 * $uri. Each $match contains the values of the matches for the
+                 * entire $uri and each sub-pattern. If a sub-pattern didn't
+                 * match anything, it's array index contains an empty string. To
+                 * find the name of the parameter, we need to loop through the
+                 * match, skipping the first index ($uri), and test for a
+                 * non-empty string. The first non-empty string found is the
+                 * name of the parameter.
+                 */
+                array_shift($match); // skip the first value
                 $param = null;
                 foreach ($match as $value) {
                     if (!empty($value)) {
