@@ -71,6 +71,9 @@ class RegexRouteTest extends PHPUnit_Framework_TestCase
         // (?'foo'...) style params
         $route = new RegexRoute('/(?\'foo\'.+)', function () {});
         $this->assertEquals($route->generateUri(['foo'=>'foo']), '/foo');
+
+        // test extra params are added as query string
+        $this->assertEquals($route->generateUri(['foo'=>'foo','bar'=>'baz']), '/foo?bar=baz');
     }
 
     /**

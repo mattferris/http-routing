@@ -66,7 +66,17 @@ class PathRoute extends RegexRoute
                 }
 
                 $uri = preg_replace('/\(\?P\<'.$param.'\>\[\^\/\?\]\+\)/', $params[$param], $uri);
+                unset($params[$param]);
             }
+        }
+
+        // add any remaining parameters as a query string
+        if (count($params) > 0) {
+            $qs = [];
+            foreach ($params as $k => $v) {
+                $qs[] = urlencode($k).'='.urlencode($v);
+            }
+            $uri .= '?'.implode('&', $qs);
         }
 
         return $uri;

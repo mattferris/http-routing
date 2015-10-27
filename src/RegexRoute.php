@@ -77,7 +77,17 @@ class RegexRoute extends SimpleRoute
 
                 $pattern = $this->generateParamRegex($param);
                 $uri = preg_replace($pattern, $params[$param], $uri);
+                unset($params[$param]);
             }
+        }
+
+        // add any remaining parameters as a query string
+        if (count($params) > 0) {
+            $qs = [];
+            foreach ($params as $k => $v) {
+                $qs[] = urlencode($k).'='.urlencode($v);
+            }
+            $uri .= '?'.implode('&', $qs);
         }
 
         return $uri;

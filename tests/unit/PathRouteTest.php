@@ -23,6 +23,9 @@ class PathRouteTest extends PHPUnit_Framework_TestCase
         $route = new PathRoute('/users/{user}/{action}', function () {});
         $uri = $route->generateUri(['user' => 'joe', 'action' => 'update']);
         $this->assertEquals($uri, '/users/joe/update');
+
+        // test extra params are added as query string
+        $this->assertEquals($route->generateUri(['user'=>'joe','action'=>'update','bar'=>'baz']), '/users/joe/update?bar=baz');
     }
 
     /**

@@ -98,7 +98,18 @@ class SimpleRoute implements RouteInterface
      */
     public function generateUri(array $params = [])
     {
-        return $this->uri;
+        $uri = $this->uri;
+
+        // add parameters as a query string
+        if (count($params) > 0) {
+            $qs = [];
+            foreach ($params as $k => $v) {
+                $qs[] = urlencode($k).'='.urlencode($v);
+            }
+            $uri .= '?'.implode('&', $qs);
+        }
+
+        return $uri;
     }
 
     /**

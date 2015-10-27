@@ -41,6 +41,9 @@ class SimpleRouteTest extends PHPUnit_Framework_TestCase
     {
         $route = new SimpleRoute('/foo', function () {});
         $this->assertEquals($route->generateUri(), '/foo');
+
+        // test extra parameters added as query string
+        $this->assertEquals($route->generateUri(['bar'=>'baz']), '/foo?bar=baz');
     }
 }
 
