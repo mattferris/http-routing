@@ -50,5 +50,16 @@ class RegexRouteTest extends PHPUnit_Framework_TestCase
         $route = new RegexRoute('^/foo$', function () {});
         $this->assertEquals($route->generateUri(), '/foo');
     }
+
+    /**
+     * @depends testGenerateUri
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage missing required parameter "foo"
+     */
+    public function testGenerateUriWithMissingParameter()
+    {
+        $route = new RegexRoute('^/(?P<foo>.+)$', function () {});
+        $route->generateUri();
+    }
 }
 

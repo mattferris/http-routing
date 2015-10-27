@@ -62,7 +62,7 @@ class PathRoute extends RegexRoute
         if (preg_match_all('/\(\?P\<([a-zA-Z_][a-zA-Z0-9_]+)\>/', $uri, $matches)) {
             foreach ($matches[1] as $param) {
                 if (!isset($params[$param])) {
-                    throw new \InvalidArgumentException('required named route parameter "'.$param.'" not specified');
+                    throw new \InvalidArgumentException('missing required parameter "'.$param.'"');
                 }
 
                 $uri = preg_replace('/\(\?P\<'.$param.'\>\[\^\/\?\]\+\)/', $params[$param], $uri);

@@ -27,12 +27,13 @@ class PathRouteTest extends PHPUnit_Framework_TestCase
 
     /**
      * @depends testGenerateUri
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage missing required parameter "foo"
      */
     public function testGenerateUriWithMissingParams()
     {
-        $this->setExpectedException('InvalidArgumentException', 'required named route parameter "action" not specified');
-        $route = new PathRoute('/users/{user}/{action}', function () {});
-        $route->generateUri(['user' => 'joe']);
+        $route = new PathRoute('/{foo}', function () {});
+        $route->generateUri();
     }
 }
 

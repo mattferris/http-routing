@@ -603,19 +603,6 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $this->setExpectedException('MattFerris\Http\Routing\NamedRouteDoesntExistException', 'named route "baz" doesn\'t exist');
         $dispatcher->reverse('baz');
     }
-
-    /**
-     * @depends testReverse
-     */
-    public function testReverseWithMissingParameters()
-    {
-        $dispatcher = new Dispatcher();
-
-        // test getting named route without specifying required parameters
-        $this->setExpectedException('InvalidArgumentException', 'required named route parameter "baz" not specified');
-        $dispatcher->get('/bar/{baz}', function(){}, [], 'bar');
-        $dispatcher->reverse('bar');
-    }
 }
 
 class DispatcherTest_Stub
