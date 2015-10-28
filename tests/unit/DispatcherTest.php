@@ -67,9 +67,9 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $dispatcher = new Dispatcher();
 
         $test = $this;
-        $dispatcher->add(new SimpleRoute('/foo', function () use ($test) {
+        $this->assertEquals($dispatcher->add(new SimpleRoute('/foo', function () use ($test) {
             return $test->getResponse();
-        }));
+        })), $dispatcher);
 
         $response = $dispatcher->dispatch($request);
         $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
@@ -101,7 +101,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         // add a route for /foo, then insert a new route for /foo in it's place
         $test = $this;
         $dispatcher->any('/foo', function () use ($test) { return $test->getResponse(); });
-        $dispatcher->insert($route, 0);
+        $this->assertEquals($dispatcher->insert($route, 0), $dispatcher);
         $response = $dispatcher->dispatch($request);
 
         $this->setExpectedException('\InvalidArgumentException', '$position out of range');
@@ -131,9 +131,9 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $dispatcher = new Dispatcher();
 
         $test = $this;
-        $dispatcher->route('/foo', function() use ($test) {
+        $this->assertEquals($dispatcher->route('/foo', function() use ($test) {
             return $test->getResponse();
-        }, 'GET', []); 
+        }, 'GET', []), $dispatcher); 
         $response = $dispatcher->dispatch($request);
 
         $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
@@ -158,9 +158,9 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $dispatcher = new Dispatcher();
 
         $test = $this;
-        $dispatcher->any('/foo', function () use ($test) {
+        $this->assertEquals($dispatcher->any('/foo', function () use ($test) {
             return $test->getResponse();
-        });
+        }), $dispatcher);
         $response = $dispatcher->dispatch($request);
 
         $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
@@ -189,9 +189,9 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $dispatcher = new Dispatcher();
 
         $test = $this;
-        $dispatcher->get('/foo', function () use ($test) {
+        $this->assertEquals($dispatcher->get('/foo', function () use ($test) {
             return $test->getResponse();
-        });
+        }), $dispatcher);
         $response = $dispatcher->dispatch($request);
 
         $this->assertInstanceOf('Psr\Http\Message\\ResponseInterface', $response);
@@ -220,9 +220,9 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $dispatcher = new Dispatcher();
 
         $test = $this;
-        $dispatcher->post('/foo', function () use ($test) {
+        $this->assertEquals($dispatcher->post('/foo', function () use ($test) {
             return $test->getResponse();
-        });
+        }), $dispatcher);
         $response = $dispatcher->dispatch($request);
 
         $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
@@ -251,9 +251,9 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $dispatcher = new Dispatcher();
 
         $test = $this;
-        $dispatcher->put('/foo', function () use ($test) {
+        $this->assertEquals($dispatcher->put('/foo', function () use ($test) {
             return $test->getResponse();
-        });
+        }), $dispatcher);
         $response = $dispatcher->dispatch($request);
 
         $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
@@ -282,9 +282,9 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $dispatcher = new Dispatcher();
 
         $test = $this;
-        $dispatcher->delete('/foo', function () use ($test) {
+        $this->assertEquals($dispatcher->delete('/foo', function () use ($test) {
             return $test->getResponse();
-        });
+        }), $dispatcher);
         $response = $dispatcher->dispatch($request);
 
         $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
@@ -313,9 +313,9 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $dispatcher = new Dispatcher();
 
         $test = $this;
-        $dispatcher->head('/foo', function () use ($test) {
+        $this->assertEquals($dispatcher->head('/foo', function () use ($test) {
             return $test->getResponse();
-        });
+        }), $dispatcher);
         $response = $dispatcher->dispatch($request);
 
         $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
@@ -344,9 +344,9 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $dispatcher = new Dispatcher();
 
         $test = $this;
-        $dispatcher->options('/foo', function () use ($test) {
+        $this->assertEquals($dispatcher->options('/foo', function () use ($test) {
             return $test->getResponse();
-        });
+        }), $dispatcher);
         $response = $dispatcher->dispatch($request);
 
         $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
@@ -375,9 +375,9 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $dispatcher = new Dispatcher();
 
         $test = $this;
-        $dispatcher->trace('/foo', function () use ($test) {
+        $this->assertEquals($dispatcher->trace('/foo', function () use ($test) {
             return $test->getResponse();
-        });
+        }), $dispatcher);
         $response = $dispatcher->dispatch($request);
 
         $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
@@ -602,6 +602,21 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         // test getting non-existent named route
         $this->setExpectedException('MattFerris\Http\Routing\NamedRouteDoesntExistException', 'named route "baz" doesn\'t exist');
         $dispatcher->generate('baz');
+    }
+
+    public function testRegister()
+    {
+        $dispatcher = new Dispatcher();
+
+        $bundle = $this->getMockBuilder('MattFerris\Http\Routing\BundleInterface')
+            ->setMethods(['provides'])
+            ->getMock();
+
+        $bundle->expects($this->once())
+            ->method('provides')
+            ->with($dispatcher);
+
+        $this->assertEquals($dispatcher->register($bundle), $dispatcher);
     }
 }
 
