@@ -566,7 +566,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     /**
      * @depends testAddRouteViaRoute
      */
-    public function testReverse()
+    public function testGenerate()
     {
         $dispatcher = new Dispatcher();
 
@@ -580,7 +580,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends testReverse
+     * @depends testGenerate
      */
     public function testAddDuplicateNamedRoute()
     {
@@ -593,9 +593,9 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends testReverse
+     * @depends testGenerate
      */
-    public function testReverseForNonExistentNameRoute()
+    public function testGenerateForNonExistentNameRoute()
     {
         $dispatcher = new Dispatcher();
 
