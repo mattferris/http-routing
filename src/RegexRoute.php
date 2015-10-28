@@ -17,22 +17,49 @@ namespace MattFerris\Http\Routing;
 class RegexRoute extends SimpleRoute
 {
     /**
+     * @var array[string] Default parameter values
+     */
+    protected $defaults;
+
+    /**
+     * @see SimpleRoute::__construct()
+     * @param string $uri The URI pattern
+     * @param callable $action The action to dispatch the request to
+     * @param string $method The HTTP method
+     * @param string[string] $headers Any HTTP headers to match
+     * @param array[string] $defaults Default parameter values
+     * @throws \InvalidArgumentException If $uri or $method is empty or non-string
+     */
+    public function __construct($uri, callable $action, $method = null, array $headers = [], array $defaults = [])
+    {
+        $this->defaults = $defaults;
+        parent::__construct($uri, $action, $method, $headers);
+    }
+
+    /**
      * Return regular expression to match parameters
      *
      * @param string $param The parameter to match
+     * @param bool $optional Is optional
      * @return string
      */
-    protected function generateParamRegex($param)
+    protected function generateParamRegex($param, $optional = false)
     {
         if (!is_string($param) || empty($param)) {
             throw new \InvalidArgumentException('$param expects non-empty string');
         }
 
-        $syntaxA = '\(\?P\<'.$param.'\>[^\)]+?\)';
-        $syntaxB = '\(\?\<'.$param.'\>[^\)]+?\)';
-        $syntaxC = '\(\?\''.$param.'\'[^\)]+?\)';
+        $syntax = [
+            '\(\?P\<'.$param.'\>[^\)]+\)',
+            '\(\?\<'.$param.'\>[^\)]+\)',
+            '\(\?\''.$param.'\'[^\)]+\)'
+        ];
 
-        return '/'.$syntaxA.'|'.$syntaxB.'|'.$syntaxC.'/';
+        if ((bool)$optional === true) {
+            $syntax[] = '';
+        }
+
+        return '/'.implode('|', $syntax).'/';
     }
 
     /**
@@ -50,6 +77,14 @@ class RegexRoute extends SimpleRoute
         $matches = [];
         $pattern = $this->generateParamRegex('([a-zA-Z_][a-zA-Z0-9_]+)');
         if (preg_match_all($pattern, $uri, $matches, PREG_SET_ORDER)) {
+
+            // load default values
+            foreach ($this->defaults as $k => $v) {
+                if (!isset($params[$k])) {
+                    $params[$k] = $v;
+                }
+            }
+
             foreach ($matches as $match) {
 
                 /*
@@ -103,7 +138,15 @@ class RegexRoute extends SimpleRoute
      */
     public function matchUri($uri, array &$matches = array())
     {
-        return (bool)preg_match('!^'.$this->uri.'!', $uri, $matches);
+        $match = (bool)preg_match('!^'.$this->uri.'!', $uri, $matches);
+        if ($match) {
+            foreach ($this->defaults as $k => $v) {
+                if (empty($matches[$k])) {
+                    $matches[$k] = $v;
+                }
+            }
+        }
+        return $match;
     }
 
     /**

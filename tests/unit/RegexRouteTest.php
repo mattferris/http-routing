@@ -13,7 +13,7 @@ class RegexRouteTest extends PHPUnit_Framework_TestCase
 
     public function testMatchUri()
     {
-        $route = new RegexRoute('/users/(?P<user>[^/?]+)/(?P<action>[^/?]+)', function () {});
+        $route = new RegexRoute('/users/(?<user>[^/]+)/(?<action>[^/]+)', function () {});
 
         $matches = array();
 
@@ -23,6 +23,15 @@ class RegexRouteTest extends PHPUnit_Framework_TestCase
 
         // make sure we match starting from the start of the uri
         $this->assertFalse($route->matchUri('/foo/users/joe/update', $matches));
+
+        // test required parameters
+        $this->assertFalse($route->matchUri('/users/joe/'));
+
+        // test optional parameters
+        $matches = [];
+        $route = new RegexRoute('/users/(?<user>[^/]+)/(?<action>[^/]+|)', function () {}, null, [], ['action' => 'update']);
+        $this->assertTrue($route->matchUri('/users/joe/', $matches));
+        $this->assertEquals($matches['action'], 'update');
     }
 
     public function testMatchMethod()
@@ -41,7 +50,7 @@ class RegexRouteTest extends PHPUnit_Framework_TestCase
     public function testMatchHeader()
     {
         $args = [];
-        $route = new RegexRoute( '/foo', function () {}, null, ['Host'=>'(?P<header>foo)']);
+        $route = new RegexRoute( '/foo', function () {}, null, ['Host'=>'(?<header>foo)']);
 
         $this->assertTrue($route->hasHeaders());
         $this->assertEquals($route->getHeaderNames(), ['host']);
@@ -72,8 +81,12 @@ class RegexRouteTest extends PHPUnit_Framework_TestCase
         $route = new RegexRoute('/(?\'foo\'.+)', function () {});
         $this->assertEquals($route->generateUri(['foo'=>'foo']), '/foo');
 
+        // test with default params
+        $route = new RegexRoute('/users/(?<user>[^/]+)/(?<action>[^/]+)', function () {}, null, [], ['action' => 'update']);
+        $this->assertEquals($route->generateUri(['user' => 'joe']), '/users/joe/update');
+
         // test extra params are added as query string
-        $this->assertEquals($route->generateUri(['foo'=>'foo','bar'=>'baz']), '/foo?bar=baz');
+        $this->assertEquals($route->generateUri(['user'=>'joe','action'=>'update', 'foo' => 'foo']), '/users/joe/update?foo=foo');
     }
 
     /**
@@ -83,7 +96,7 @@ class RegexRouteTest extends PHPUnit_Framework_TestCase
      */
     public function testGenerateUriWithMissingParameter()
     {
-        $route = new RegexRoute('/(?P<foo>.+)', function () {});
+        $route = new RegexRoute('/(?<foo>.+)', function () {});
         $route->generateUri();
     }
 }
