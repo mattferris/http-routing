@@ -74,6 +74,22 @@ Multiple parameters can be captured and will be passed to the action in the same
         ...
     });
 
+Parameter names must start with letters or an underscore and contain letter, numbers and underscores (as a regex, this would look like `[a-zA-Z_][a-zA-Z0-9_]+`). This follows PHPs allowed characters for variable names.
+
+By default, all parameters are required for a URI to match the route. When a route is created, you can define default values for it's parameters. Any parameter that has a default value is considered to be optional. Parameters are passed as the fourth argument.
+
+    $dispatcher->get('/users/{username}/{option}', $action, $headers, ['option' => 'update']);
+
+This route will now match `/users/joe/preferences` as well as `/users/joe/`. In the case of `/users/joe/`, because `{option}` isn't specified it will default to `update`.
+
+Once a parameter has been defined as optional, all parameters that follow must also be optional. A `BadLogicException` will be thrown if a required parameter proceeds an optional parameter.
+
+    // {details} must be optional because {option} is optional
+    $dispatcher->get('/users/{username}/{option}/{details}', $action, $headers, ['option' => 'update', 'details' => '']);
+
+    // {details} is required (no default value), which will throw an exception
+    $dispatcher->get('/users/{username}/{option}/{details}', $action $headers, ['option' => 'update']);
+
 ### Error 404 Handling
 
 You can define a 404 handler easily enough by defining the last route in the *route stack* with generic criteria, and setting the action to a piece of code that can generate an approriate response.
@@ -140,6 +156,40 @@ The routing section touched on how named parameters can be accessed via the argu
 
 For more on dependency injection, checkout [mattferris/di](http://bueller.ca/di).
 
+Named Routes and Reverse Routing
+--------------------------------
+
+You can optionally specify names for routes. Named routes can then be used to generate URIs that will match the given route using `generate($name)`. Use this method of URI generation to bind your application to routes instead of URIs.
+
+    // specify a route called auth_login
+    $dispatcher->post('/login', 'AuthController::login', [], 'auth_login');
+
+    // now you can generate URIs in your actions based on the route
+    public function someAction()
+    {
+        $uri = $dispatcher->generate('auth_login');
+        // $uri contains '/login'
+    }
+ 
+    // if you need to change the route, the action will automatically
+    // generate the correct URI
+    $dispatcher->post('/auth/login', 'AuthController::login', [], 'auth_login');
+
+### Parameters
+
+Routes containing parameters must be passed an array of parameter values to use.
+
+    $dispatcher->get('/users/{user}', 'UsersController::getUser', [], 'get_user');
+
+    // pass the username to use for the {user} parameter
+    $uri = $dispatcher->generate('get_user', ['user' => 'joe']);
+    echo $uri; // outputs '/users/joe'
+
+You can pass extra parameters that aren't defined in the route. Extra parameters are used to generate a query string.
+
+    $uri = $dispatcher->generate('get_user', ['user' => 'joe', 'foo' => 'bar']);
+    echo $uri; // outputs '/users/joe?foo=bar'
+
 Bundles
 -------
 
@@ -172,7 +222,7 @@ You can also add route objects directly using `Dispatcher::add()` and `Dispatche
 
     $dispatcher
         ->add(new SimpleRoute('/foo', 'Controller::someAction'))
-        ->insert(new RegexRoute('^/foo/(bar|baz)', 'Controller::anotherAction'));
+        ->insert(new RegexRoute('/foo/(bar|baz)', 'Controller::anotherAction'));
 
 Route constructors accept 4 arguments.
 
@@ -180,7 +230,7 @@ Route constructors accept 4 arguments.
 
 `$method` and `$headers` are optional.
 
-`RegexRoute` allows you to use regular expressions to match URIs, methods and headers. While flexible, the syntax for capturing parameters can be a little unweildly (`^/users/(?P<username>[a-zA-Z_]+?)/`). `PathRoute` extends `RegexRoute` to provide friendly parameter matching for URIs, but can still employ full regex functionality for URIs, methods and headers as well.
+`RegexRoute` allows you to use regular expressions to match URIs, methods and headers. While flexible, the syntax for capturing parameters can be a little unweildly (`/users/(?P<username>[a-zA-Z_]+?)/`). `PathRoute` extends `RegexRoute` to provide friendly parameter matching for URIs, but can still employ full regex functionality for URIs, methods and headers as well.
 
 `SimpleRoute` truly is simple. Not pattern matching. URIs are matched on prefix, so `/foo` will match `/foo/bar` and `/foo/baz`. It's sole purpose is for efficiency.
 
@@ -193,7 +243,14 @@ Route types can be used together within the same route stack to acheive effecien
     $dispatcher->add(new PathRoute('/users/{username}', 'UsersController::getUser', 'GET');
 
     // capture similar requests
-    $dispatcher->add(new RegexRoute('^/(help|support)', 'HelpController::getHelp', 'GET');
+    $dispatcher->add(new RegexRoute('/(help|support)', 'HelpController::getHelp', 'GET');
 
     // error 404
     $dispatcher->add(new SimpleRoute('/', 'ErrorController::error404');
+
+### RegexRoute and Optional Parameters
+
+When specifying default parameters in `RegexRoute` routes, the optional parameter sub-patterns must allow for an empty match.
+
+    new RegexRoute('/users/(?<username>[a-zA-Z_]+?|)', $action, $method, $headers, ['username' => '']);
+
