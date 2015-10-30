@@ -1,7 +1,7 @@
 <?php
 
 /**
- * HttpRouting - An HTTP routing dispatcher
+ * Http Routing - An HTTP routing dispatcher
  * www.bueller.ca/http-routing
  *
  * DomainEventLoginHelpers.php
@@ -12,7 +12,7 @@
  * www.bueller.ca/http-routing/license
  */
 
-namespace MattFerris\HttpRouting;
+namespace MattFerris\Http\Routing;
 
 use MattFerris\Events\AbstractLoggerHelpers;
 
@@ -21,7 +21,7 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
     /**
      * Generate a log message for DispatcheRequestEvent events
      *
-     * @param \MattFerris\HttpRouting\DispatchedRequestEvent $event The dispatched event
+     * @param \MattFerris\Http\Routing\DispatchedRequestEvent $event The dispatched event
      * @return string The generated log message
      */
     static public function onDispatchedRequestEvent(DispatchedRequestEvent $event)
@@ -62,7 +62,7 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
     /**
      * Generate a log message for ReceivedRequestEvent events
      *
-     * @param \MattFerris\HttpRouting\ReceivedRequestEvent $event The dispatched event
+     * @param \MattFerris\Http\Routing\ReceivedRequestEvent $event The dispatched event
      * @return string The generated log message
      */
     static public function onReceivedRequestEvent(ReceivedRequestEvent $event)

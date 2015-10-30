@@ -1,28 +1,30 @@
-HttpRouting
-===========
+HTTP Routing
+============
 
 [![Build Status](https://travis-ci.org/mattferris/http-routing.svg?branch=master)](https://travis-ci.org/mattferris/http-routing)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/2996f3e8-b7a9-424c-a656-939e98d07916/mini.png)](https://insight.sensiolabs.com/projects/2996f3e8-b7a9-424c-a656-939e98d07916)
 
-An HTTP routing library for PHP
+A PSR-7 compliant HTTP routing library for PHP
+
+Installable via composer:
+
+    composer require mattferris/http-routing
+
+To use this library, you'll need to also install a PSR-7 compliant HTTP messaging library like [zendframework/zend-diactoros](https://github.com/zendframework/zend-diactoros).
 
 Dispatcher
 ----------
 
-The dispatcher resolves requests by comparing the URI of the passed `Request` object against it's list of routes.
+The dispatcher resolves requests by comparing the passed instance `Psr\Http\Message\ServerRequestInterface` against it's list of routes.
 
-    use MattFerris\HttpRouting\Dispatcher;
+    use MattFerris\Http\Routing\Dispatcher;
 
-    $dispatcher = new Dispatcher();
+    $dispatcher = new Dispatcher($request);
 
-Calling `dispatch()` routes the request to an action, which, in turn, returns a response. This response is then returned by `dispatch()`. The response is an instance of `Response`. Unless you want to modify the current request, you can call `dispatch()` without arguments, however you can pass a custom request for processing. To send the response to the client, call `send()` on the returned response.
+Calling `dispatch()` routes the request to an action. The action is responsible for generating and returning a response. This response is then returned by `dispatch()`. The response is an instance of `Psr\Http\Message\ResponseInterface`. 
 
-    $response = $dispatcher->dispatch();
-    $response->send();
-
-Or, if you prefer a one-liner:
-
-    $dispatcher->dispatch()->send();
+    // get a response
+    $response = $dispatcher->dispatch($request);
 
 Routing
 -------
@@ -33,7 +35,7 @@ Routes can be added a number of ways. A simple method is by using the helper met
 
     // handle requests for GET /foo with a closure
     $dispatcher->get('/foo', function () {
-        return new Response('response to GET /foo');
+        return $response;
     });
 
     // handle requests for POST /foo with the fooAction() method on the Controller class
@@ -52,7 +54,7 @@ All helper methods also support a third parameter for matching HTTP headers. The
 
 ### Capturing Parameters
 
-You can capture parts of the URI using named parameters.For example, to capture usernames in the URI `/users/joe`, where `joe` can be any username, you could do the following.
+You can capture parts of the URI using named parameters. For example, to capture usernames in the URI `/users/joe`, where `joe` can be any username, you could do the following.
 
     $dispatcher->get('/users/{username}', 'Controller::fooAction');
 
@@ -72,18 +74,34 @@ Multiple parameters can be captured and will be passed to the action in the same
         ...
     });
 
+Parameter names must start with letters or an underscore and contain letter, numbers and underscores (as a regex, this would look like `[a-zA-Z_][a-zA-Z0-9_]+`). This follows PHPs allowed characters for variable names.
+
+By default, all parameters are required for a URI to match the route. When a route is created, you can define default values for it's parameters. Any parameter that has a default value is considered to be optional. Parameters are passed as the fourth argument.
+
+    $dispatcher->get('/users/{username}/{option}', $action, $headers, ['option' => 'update']);
+
+This route will now match `/users/joe/preferences` as well as `/users/joe/`. In the case of `/users/joe/`, because `{option}` isn't specified it will default to `update`.
+
+Once a parameter has been defined as optional, all parameters that follow must also be optional. A `BadLogicException` will be thrown if a required parameter proceeds an optional parameter.
+
+    // {details} must be optional because {option} is optional
+    $dispatcher->get('/users/{username}/{option}/{details}', $action, $headers, ['option' => 'update', 'details' => '']);
+
+    // {details} is required (no default value), which will throw an exception
+    $dispatcher->get('/users/{username}/{option}/{details}', $action $headers, ['option' => 'update']);
+
 ### Error 404 Handling
 
 You can define a 404 handler easily enough by defining the last route in the *route stack* with generic criteria, and setting the action to a piece of code that can generate an approriate response.
 
     $dispatcher->any('/', function () {
-        return new Response('not found', 404);
+        return $error404Response;
     });
 
 Actions
 -------
 
-An action defines the code that actually processes the request and generates a response. The only requirement of an action is that it return an instance of `ResponseInterface`, an instance of `RequestInterface`, or nothing at all.
+An action defines the code that actually processes the request and generates a response. The only requirement of an action is that it return an instance of `Psr\Http\Message\ResponseInterface`, an instance of `Psr\Http\Message\ServerRequestInterface`, or nothing at all.
 
     // given these routes...
     $dispatcher
@@ -97,28 +115,24 @@ An action defines the code that actually processes the request and generates a r
         {
             ...
 
-            return new Response(
-                '{"bar":"'.$bar.'"}', 200, 'application/json'
-            );
+            return $response;
         }
 
         public function postFooAction()
         {
             ...
 
-            return new Response(
-                '{"status": "success"}', 200, 'application/json'
-            );
+            return $response;
         }
     }
 
 ### Internal Redirects
 
-You can redirect a client with an HTTP 301 response (for example), which the browser then interprets and issues a new request to the specified URL. In some cases, you may want to simply re-evaluate a new request without returning anything to the client. This is possible by returning an instance of `RequestInterface` from the action.
+You can redirect a client with an HTTP 301 response (for example), which the browser then interprets and issues a new request to the specified URL. In some cases, you may want to simply re-evaluate a new request without returning anything to the client. This is possible by returning an instance of `Psr\Http\Message\ServerRequestInterface` from the action.
 
     public function someAction()
     {
-        return new Request();
+        return $request;
     }
 
 When `Dispatcher` identifies the return value from the action as a new request, it calls `dispatch()` again and passes the new request as an argument. The new request is processed exactly the same as the original.
@@ -131,55 +145,61 @@ When `Dispatcher` identifies the return value from the action as a new request, 
         error_log('received request: '.$request->getUri());
     });
 
-### Request Attributes
-
-When using internal redirects or *fall-through routes*, it can be useful to pass along information from one action to another. This can be done by setting attributes on the request object using `setAttribute()`.
-
-    public function getFooAction(RequestInterface $request)
-    {
-        $request->setAttribute('bar', 'baz');
-    }
-
-Other actions can then access this information via `getAttribute()`.
-
-    public function anotherAction(RequestInterface $request)
-    {
-        $bar = $request->getAttribute('bar');
-    }
-
 ### Argument Injection
 
 The routing section touched on how named parameters can be accessed via the arguments of your action, i.e. a pattern named `username` can be access via an argument name `$username`. This is done via injection, where the dependency injector matches the argument name to the parameter. In addition to parameters, your actions can access additional information via arguments, such as the current request object.
 
-    public function someAction(RequestInterface $request)
+    public function someAction(\Psr\Http\Message\ServerRequestInterface $request)
     {
         ...
     }
 
 For more on dependency injection, checkout [mattferris/di](http://bueller.ca/di).
 
+Named Routes and Reverse Routing
+--------------------------------
+
+You can optionally specify names for routes. Named routes can then be used to generate URIs that will match the given route using `generate($name)`. Use this method of URI generation to bind your application to routes instead of URIs.
+
+    // specify a route called auth_login
+    $dispatcher->post('/login', 'AuthController::login', [], 'auth_login');
+
+    // now you can generate URIs in your actions based on the route
+    public function someAction()
+    {
+        $uri = $dispatcher->generate('auth_login');
+        // $uri contains '/login'
+    }
+ 
+    // if you need to change the route, the action will automatically
+    // generate the correct URI
+    $dispatcher->post('/auth/login', 'AuthController::login', [], 'auth_login');
+
+### Parameters
+
+Routes containing parameters must be passed an array of parameter values to use.
+
+    $dispatcher->get('/users/{user}', 'UsersController::getUser', [], 'get_user');
+
+    // pass the username to use for the {user} parameter
+    $uri = $dispatcher->generate('get_user', ['user' => 'joe']);
+    echo $uri; // outputs '/users/joe'
+
+You can pass extra parameters that aren't defined in the route. Extra parameters are used to generate a query string.
+
+    $uri = $dispatcher->generate('get_user', ['user' => 'joe', 'foo' => 'bar']);
+    echo $uri; // outputs '/users/joe?foo=bar'
+
 Bundles
 -------
 
-Within your application, you can define 'bundles', which are a collection of routes that parts of your application can handle. Bundles can be registered with a dispatcher via `register()`. Bundles are just a plain class implementing `BundleInterface`, and must define a single method, `provides()`, which returns an array of the supported routes.
+Within your application, you can define 'bundles', which are a collection of routes that parts of your application can handle. Bundles can be registered with a dispatcher via `register()`. Bundles are just a plain class implementing `MattFerris\Http\Routing\BundleInterface`, and must define a single method, `provides()`, which accepts an instance of `Dispatcher` as it's only argument.
 
-Each route returned by `provides()` must have at least a `uri` and `action` key defined, and if specified `headers` must be a array.
-
-    class MyAppBundle implements \MattFerris\HttpRouting\BundleInterface
+    class MyAppBundle implements \MattFerris\Http\Routing\BundleInterface
     {
-        public function provides()
+        public function provides(\MattFerris\Http\Routing\Dispatcher $dispatcher)
         {
-            return [
-                [
-                    'method' => 'GET',
-                    'uri' => '/users/{username}',
-                    'headers' => ['Host' => 'example.com'],
-                    'action' => 'Controller:someAction'
-                ],
-                [
-                    ...
-                ]
-            ];
+            $dispatcher->get('/users/{username}', 'Controller::someAction', ['Host => 'example.com']);
         }
     }
 
@@ -194,7 +214,7 @@ Advanced Routing
 
 Internally, routes are represented as objects implementing `RouteInterface`. When adding routes using the helper methods, the `Dispatcher` creates route objects. By default, these route objects are all `PathRoute` instances, as `PathRoute` is the default type. This can be changed by calling `Dispatcher::setDefaultRouteType()`. Two other route types are included: `SimpleRoute` and `RegexRoute`.
 
-    $dispatcher->setDefaultRouteType('\MattFerris\HttpRouting\RegexRoute');
+    $dispatcher->setDefaultRouteType('\MattFerris\Http\Routing\RegexRoute');
 
 After setting the new default route type, all helper methods will then create instances of the new route type. This can be used to implement your own route type.
 
@@ -202,7 +222,7 @@ You can also add route objects directly using `Dispatcher::add()` and `Dispatche
 
     $dispatcher
         ->add(new SimpleRoute('/foo', 'Controller::someAction'))
-        ->insert(new RegexRoute('^/foo/(bar|baz)', 'Controller::anotherAction'));
+        ->insert(new RegexRoute('/foo/(bar|baz)', 'Controller::anotherAction'));
 
 Route constructors accept 4 arguments.
 
@@ -210,7 +230,7 @@ Route constructors accept 4 arguments.
 
 `$method` and `$headers` are optional.
 
-`RegexRoute` allows you to use regular expressions to match URIs, methods and headers. While flexible, the syntax for capturing parameters can be a little unweildly (`^/users/(?P<username>[a-zA-Z_]+?)/`). `PathRoute` extends `RegexRoute` to provide friendly parameter matching for URIs, but can still employ full regex functionality for URIs, methods and headers as well.
+`RegexRoute` allows you to use regular expressions to match URIs, methods and headers. While flexible, the syntax for capturing parameters can be a little unweildly (`/users/(?P<username>[a-zA-Z_]+?)/`). `PathRoute` extends `RegexRoute` to provide friendly parameter matching for URIs, but can still employ full regex functionality for URIs, methods and headers as well.
 
 `SimpleRoute` truly is simple. Not pattern matching. URIs are matched on prefix, so `/foo` will match `/foo/bar` and `/foo/baz`. It's sole purpose is for efficiency.
 
@@ -223,7 +243,14 @@ Route types can be used together within the same route stack to acheive effecien
     $dispatcher->add(new PathRoute('/users/{username}', 'UsersController::getUser', 'GET');
 
     // capture similar requests
-    $dispatcher->add(new RegexRoute('^/(help|support)', 'HelpController::getHelp', 'GET');
+    $dispatcher->add(new RegexRoute('/(help|support)', 'HelpController::getHelp', 'GET');
 
     // error 404
     $dispatcher->add(new SimpleRoute('/', 'ErrorController::error404');
+
+### RegexRoute and Optional Parameters
+
+When specifying default parameters in `RegexRoute` routes, the optional parameter sub-patterns must allow for an empty match.
+
+    new RegexRoute('/users/(?<username>[a-zA-Z_]+?|)', $action, $method, $headers, ['username' => '']);
+

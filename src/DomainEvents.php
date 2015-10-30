@@ -1,7 +1,7 @@
 <?php
 
 /**
- * HttpRouting - An HTTP routing dispatcher
+ * Http Routing - An HTTP routing dispatcher
  * wwww.bueller.ca/http-routing
  *
  * DomainEvents.php
@@ -12,7 +12,7 @@
  * www.bueller.ca/http-routing/license
  */
 
-namespace MattFerris\HttpRouting;
+namespace MattFerris\Http\Routing;
 
 use MattFerris\Events\AbstractDomainEvents;
 

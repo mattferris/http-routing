@@ -1,6 +1,6 @@
 <?php
 
-use MattFerris\HttpRouting\SimpleRoute;
+use MattFerris\Http\Routing\SimpleRoute;
 
 class SimpleRouteTest extends PHPUnit_Framework_TestCase
 {
@@ -31,10 +31,19 @@ class SimpleRouteTest extends PHPUnit_Framework_TestCase
         $route = new SimpleRoute('/foo', function () {}, null, array('Host'=>'foo'));
 
         $this->assertTrue($route->hasHeaders());
-        $this->assertEquals($route->getHeaderNames(), array('Host'));
+        $this->assertEquals($route->getHeaderNames(), array('host'));
         $this->assertFalse($route->matchHeader('Host', 'bar'));
         $this->assertTrue($route->matchHeader('Host', 'foo'));
         $this->assertTrue($route->matchHeader('host', 'foo'));
+    }
+
+    public function testGenerateUri()
+    {
+        $route = new SimpleRoute('/foo', function () {});
+        $this->assertEquals($route->generateUri(), '/foo');
+
+        // test extra parameters added as query string
+        $this->assertEquals($route->generateUri(['bar'=>'baz']), '/foo?bar=baz');
     }
 }
 

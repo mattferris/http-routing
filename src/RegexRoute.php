@@ -1,7 +1,7 @@
 <?php
 
 /**
- * HttpRouting - An HTTP routing dispatcher
+ * Http Routing - An HTTP routing dispatcher
  * www.bueller.ca/http-routing
  *
  * RegexRoute.php
@@ -12,10 +12,122 @@
  * www.bueller.ca/http-routing/license
  */
 
-namespace MattFerris\HttpRouting;
+namespace MattFerris\Http\Routing;
 
 class RegexRoute extends SimpleRoute
 {
+    /**
+     * @var array[string] Default parameter values
+     */
+    protected $defaults;
+
+    /**
+     * @see SimpleRoute::__construct()
+     * @param string $uri The URI pattern
+     * @param callable $action The action to dispatch the request to
+     * @param string $method The HTTP method
+     * @param string[string] $headers Any HTTP headers to match
+     * @param array[string] $defaults Default parameter values
+     * @throws \InvalidArgumentException If $uri or $method is empty or non-string
+     */
+    public function __construct($uri, callable $action, $method = null, array $headers = [], array $defaults = [])
+    {
+        $this->defaults = $defaults;
+        parent::__construct($uri, $action, $method, $headers);
+    }
+
+    /**
+     * Return regular expression to match parameters
+     *
+     * @param string $param The parameter to match
+     * @param bool $optional Is optional
+     * @return string
+     */
+    protected function generateParamRegex($param, $optional = false)
+    {
+        if (!is_string($param) || empty($param)) {
+            throw new \InvalidArgumentException('$param expects non-empty string');
+        }
+
+        $syntax = [
+            '\(\?P\<'.$param.'\>[^\)]+\)',
+            '\(\?\<'.$param.'\>[^\)]+\)',
+            '\(\?\''.$param.'\'[^\)]+\)'
+        ];
+
+        if ((bool)$optional === true) {
+            $syntax[] = '';
+        }
+
+        return '/'.implode('|', $syntax).'/';
+    }
+
+    /**
+     * Return a URI that would match the route
+     *
+     * @param array $params Values for route parameters
+     * @return string
+     * @throw \InvalidArgumentException Required parameters haven't been
+     *     specified
+     */
+    public function generateUri(array $params = [])
+    {
+        $uri = $this->uri;
+
+        $matches = [];
+        $pattern = $this->generateParamRegex('([a-zA-Z_][a-zA-Z0-9_]+)');
+        if (preg_match_all($pattern, $uri, $matches, PREG_SET_ORDER)) {
+
+            // load default values
+            foreach ($this->defaults as $k => $v) {
+                if (!isset($params[$k])) {
+                    $params[$k] = $v;
+                }
+            }
+
+            foreach ($matches as $match) {
+
+                /*
+                 * $matches is an array containing arrays for each $match in the
+                 * $uri. Each $match contains the values of the matches for the
+                 * entire $uri and each sub-pattern. If a sub-pattern didn't
+                 * match anything, it's array index contains an empty string. To
+                 * find the name of the parameter, we need to loop through the
+                 * match, skipping the first index ($uri), and test for a
+                 * non-empty string. The first non-empty string found is the
+                 * name of the parameter.
+                 */
+                array_shift($match); // skip the first value
+                $param = null;
+                foreach ($match as $value) {
+                    if (!empty($value)) {
+                        $param = $value;
+                        break;
+                    }
+                }
+
+                if (!isset($params[$param])) {
+                    throw new \InvalidArgumentException('missing required parameter "'.$param.'"');
+                }
+
+                $pattern = $this->generateParamRegex($param);
+                $uri = preg_replace($pattern, $params[$param], $uri);
+                unset($params[$param]);
+            }
+        }
+
+        // add any remaining parameters as a query string
+        if (count($params) > 0) {
+            $qs = [];
+            foreach ($params as $k => $v) {
+                $qs[] = urlencode($k).'='.urlencode($v);
+            }
+            $uri .= '?'.implode('&', $qs);
+        }
+
+        return $uri;
+    }
+
     /**
      * Match the supplied against the routes URI
      *
@@ -26,7 +138,15 @@ class RegexRoute extends SimpleRoute
      */
     public function matchUri($uri, array &$matches = array())
     {
-        return (bool)preg_match('!'.$this->uri.'!', $uri, $matches);
+        $match = (bool)preg_match('!^'.$this->uri.'!', $uri, $matches);
+        if ($match) {
+            foreach ($this->defaults as $k => $v) {
+                if (empty($matches[$k])) {
+                    $matches[$k] = $v;
+                }
+            }
+        }
+        return $match;
     }
 
     /**
@@ -40,7 +160,7 @@ class RegexRoute extends SimpleRoute
      */
     public function matchMethod($method, array &$matches = array())
     {
-        return (bool)preg_match('!'.$this->method.'!', $method, $matches);
+        return (bool)preg_match('!^'.$this->method.'$!', $method, $matches);
     }
 
     /**
@@ -55,10 +175,10 @@ class RegexRoute extends SimpleRoute
      */
     public function matchHeader($header, $value, array &$matches = array())
     {
-        foreach ($this->headers as $h => $v) {
-            if (preg_match('!'.$v.'!', $value, $matches)) {
-                return true;
-            }
+        // normalize
+        $header = strtolower($header);
+        if (isset($this->headers[$header]) && preg_match('!^'.$this->headers[$header].'$!', $value, $matches)) {
+            return true;
         }
         return false;
     }

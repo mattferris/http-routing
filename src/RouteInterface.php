@@ -1,7 +1,7 @@
 <?php
 
 /**
- * HttpRouting - An HTTP routing dispatcher
+ * Http Routing - An HTTP routing dispatcher
  * www.bueller.ca/http-routing
  *
  * RouteInterface.php
@@ -12,7 +12,7 @@
  * www.bueller.ca/http-routing/license
  */
 
-namespace MattFerris\HttpRouting;
+namespace MattFerris\Http\Routing;
 
 interface RouteInterface
 {
@@ -31,7 +31,17 @@ interface RouteInterface
      * @return bool True if URI matches, otherwise false
      * @throws \InvalidArgumentException If $uri isn't a string
      */
-    public function matchUri($uri, array &$matches = array());
+    public function matchUri($uri, array &$matches = []);
+
+    /**
+     * Return a URI that would match the route
+     *
+     * @param array $params Values for route parameters
+     * @return string
+     * @throw \InvalidArgumentException Required parameters haven't been
+     *     specified
+     */
+    public function generateUri(array $params = []);
 
     /**
      * Check the route has HTTP method criteria
@@ -56,7 +66,7 @@ interface RouteInterface
      * @return bool True if method matches, otherwise false
      * @throws \InvalidArgumentException If $method isn't a string
      */
-    public function matchMethod($method, array &$matches = array());
+    public function matchMethod($method, array &$matches = []);
 
     /**
      * Return the route action
@@ -89,6 +99,6 @@ interface RouteInterface
      * @return bool True if header matches, otherwise false
      * @throws \InvalidArgumentException If $header isn't a string
      */
-    public function matchHeader($header, $value, array &$matches = array());
+    public function matchHeader($header, $value, array &$matches = []);
 }
 

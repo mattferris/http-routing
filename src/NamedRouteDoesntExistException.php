@@ -4,7 +4,7 @@
  * Http Routing - An HTTP routing dispatcher
  * www.bueller.ca/http-routing
  *
- * BundleInterface.php
+ * InvalidRouteCriteriaException.php
  * @copyright Copyright (c) 2015
  * @author Matt Ferris <matt@bueller.ca>
  *
@@ -14,9 +14,7 @@
 
 namespace MattFerris\Http\Routing;
 
-use MattFerris\Provider\ProviderInterface;
-
-interface BundleInterface extends ProviderInterface
+class NamedRouteDoesntExistException extends \Exception
 {
 }
 

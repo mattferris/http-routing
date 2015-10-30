@@ -1,7 +1,7 @@
 <?php
 
 /**
- * HttpRouting - An HTTP routing dispatcher
+ * Http Routing - An HTTP routing dispatcher
  * www.bueller.ca/http-routing
  *
  * AbstractRoute.php
@@ -12,7 +12,7 @@
  * www.bueller.ca/http-routing/license
  */
 
-namespace MattFerris\HttpRouting;
+namespace MattFerris\Http\Routing;
 
 class SimpleRoute implements RouteInterface
 {
@@ -53,10 +53,16 @@ class SimpleRoute implements RouteInterface
             throw new \InvalidArgumentException('$method expects non-empty string or null');
         }
 
+        // normalize headers
+        $normalized = [];
+        foreach ($headers as $h => $v) {
+            $normalized[strtolower($h)] = $v;
+        }
+
         $this->uri = $uri;
         $this->action = $action;
         $this->method = $method;
-        $this->headers = $headers;
+        $this->headers = $normalized;
     }
 
     /**
@@ -80,6 +86,30 @@ class SimpleRoute implements RouteInterface
     public function matchUri($uri, array &$matches = array())
     {
         return (strpos($uri, $this->uri) === 0);
+    }
+
+    /**
+     * Return a URI that would match the route
+     *
+     * @param array $params Values for route parameters
+     * @return string
+     * @throw \InvalidArgumentException Required parameters haven't been
+     *     specified
+     */
+    public function generateUri(array $params = [])
+    {
+        $uri = $this->uri;
+
+        // add parameters as a query string
+        if (count($params) > 0) {
+            $qs = [];
+            foreach ($params as $k => $v) {
+                $qs[] = urlencode($k).'='.urlencode($v);
+            }
+            $uri .= '?'.implode('&', $qs);
+        }
+
+        return $uri;
     }
 
     /**
@@ -158,11 +188,12 @@ class SimpleRoute implements RouteInterface
      */
     public function matchHeader($header, $value, array &$matches = array())
     {
-        foreach ($this->headers as $h => $v) {
-            if (strcasecmp($h, $header) === 0 && strcmp($v, $value) === 0) {
-                return true;
-            }
+        // normalize
+        $header = strtolower($header);
+        if (isset($this->headers[$header]) && $this->headers[$header] === $value) {
+            return true;
         }
+
         return false;
     }
 }

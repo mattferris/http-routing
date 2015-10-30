@@ -1,30 +1,78 @@
 <?php
 
-use MattFerris\HttpRouting\DomainEvent;
-use MattFerris\HttpRouting\DomainEvents;
-use MattFerris\HttpRouting\Dispatcher;
-use MattFerris\HttpRouting\RequestInterface;
-use MattFerris\HttpRouting\Request;
-use MattFerris\HttpRouting\Response;
-use MattFerris\HttpRouting\SimpleRoute;
+use MattFerris\Http\Routing\DomainEvent;
+use MattFerris\Http\Routing\DomainEvents;
+use MattFerris\Http\Routing\Dispatcher;
+use MattFerris\Http\Routing\SimpleRoute;
+use Psr\Http\Message\UriInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 class DispatcherTest extends PHPUnit_Framework_TestCase
 {
+    public function getUri()
+    {
+        return $this->getMockBuilder('Psr\Http\Message\UriInterface')
+            ->setMethods([
+                'getPath', 'withPath', 'getUserInfo', 'withUserInfo',
+                'getAuthority', 'getHost', 'withHost', 'getPort', 'withPort',
+                'getQuery', 'withQuery', 'getScheme', 'withScheme',
+                'getFragment', 'withFragment', '__toString'
+            ])
+            ->getMock();
+    }
+
+    public function getRequest()
+    {
+        return $this->getMockBuilder('Psr\Http\Message\ServerRequestInterface')
+            ->setMethods([
+                // ServerRequestInterface methods
+                'getServerParams', 'getCookieParams', 'withCookieParams',
+                'getQueryParams', 'withQueryParams', 'getUploadedFiles',
+                'withUploadedFiles', 'getParsedBody', 'withParsedBody',
+                'getAttributes', 'getAttribute', 'withAttribute',
+                'withoutAttribute',
+
+                // RequestInterface methods
+                'getRequestTarget', 'withRequestTarget', 'getMethod',
+                'withMethod', 'getUri', 'withUri',
+
+                // MessageInterface methods
+                'getProtocolVersion', 'withProtocolVersion', 'getHeaders',
+                'hasHeader', 'getHeader', 'getHeaderLine', 'withHeader',
+                'withAddedHeader', 'withoutHeader', 'getBody', 'withBody'
+            ])
+            ->getMock();
+    }
+
+    public function getResponse()
+    {
+        return $this->getMockBuilder('Psr\Http\Message\ResponseInterface')
+            ->setMethods([])
+            ->getMock();
+    }
+
     public function testDispatch()
     {
-        $request = new Request(array(
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/foo'
-        ));
+        $uri = $this->getUri();
+        $uri->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/foo');
 
+        $request = $this->getRequest();
+        $request->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uri);
+        
         $dispatcher = new Dispatcher();
 
-        $dispatcher->add(new SimpleRoute('/foo', function () {
-            return new Response();
-        }));
+        $test = $this;
+        $this->assertEquals($dispatcher->add(new SimpleRoute('/foo', function () use ($test) {
+            return $test->getResponse();
+        })), $dispatcher);
 
         $response = $dispatcher->dispatch($request);
-        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
     }
 
     /**
@@ -32,22 +80,29 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
      */
     public function testAddRouteViaInsert()
     {
-        $request = new Request(array(
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/foo'
-        ));
+        $uri = $this->getUri();
 
-        $route = new SimpleRoute('/foo', function () {
-            return new Response('via insert()');
-        }, 'GET');
+        $uri->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/foo');
+
+        $request = $this->getRequest();
+        $request->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uri);
+
+        $test = $this;
+        $route = new SimpleRoute('/foo', function () use ($test) {
+            return $test->getResponse();
+        });
+
+        $dispatcher = new Dispatcher();
 
         // add a route for /foo, then insert a new route for /foo in it's place
-        $dispatcher = new Dispatcher();
-        $dispatcher->get('/foo', function () { return new Response('via get()'); });
-        $dispatcher->insert($route, 0);
+        $test = $this;
+        $dispatcher->any('/foo', function () use ($test) { return $test->getResponse(); });
+        $this->assertEquals($dispatcher->insert($route, 0), $dispatcher);
         $response = $dispatcher->dispatch($request);
-
-        $this->assertEquals('via insert()', $response->getBody());
 
         $this->setExpectedException('\InvalidArgumentException', '$position out of range');
         $dispatcher->insert($route, 10);
@@ -58,18 +113,30 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
      */
     public function testAddRouteViaRoute()
     {
-        $request = new Request(array(
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/foo'
-        ));
+        $uri = $this->getUri();
+
+        $uri->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/foo');
+
+        $request = $this->getRequest();
+        $request->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uri);
+
+        $request->expects($this->once())
+            ->method('getMethod')
+            ->willReturn('GET');
 
         $dispatcher = new Dispatcher();
-        $dispatcher->route('/foo', function() {
-            return new Response();
-        }, 'GET', array()); 
+
+        $test = $this;
+        $this->assertEquals($dispatcher->route('/foo', function() use ($test) {
+            return $test->getResponse();
+        }, 'GET', []), $dispatcher); 
         $response = $dispatcher->dispatch($request);
 
-        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
     }
 
     /**
@@ -77,18 +144,26 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
      */
     public function testAddRouteViaAny()
     {
-        $request = new Request(array(
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/foo'
-        ));
+        $uri = $this->getUri();
+
+        $uri->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/foo');
+
+        $request = $this->getRequest();
+        $request->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uri);
 
         $dispatcher = new Dispatcher();
-        $dispatcher->any('/foo', function () {
-            return new Response();
-        });
+
+        $test = $this;
+        $this->assertEquals($dispatcher->any('/foo', function () use ($test) {
+            return $test->getResponse();
+        }), $dispatcher);
         $response = $dispatcher->dispatch($request);
 
-        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
     }
 
     /**
@@ -96,18 +171,30 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
      */
     public function testAddRouteViaGet()
     {
-        $request = new Request(array(
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/foo'
-        ));
+        $uri = $this->getUri();
+
+        $uri->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/foo');
+
+        $request = $this->getRequest();
+        $request->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uri);
+
+        $request->expects($this->once())
+            ->method('getMethod')
+            ->willReturn('GET');
 
         $dispatcher = new Dispatcher();
-        $dispatcher->get('/foo', function () {
-            return new Response();
-        });
+
+        $test = $this;
+        $this->assertEquals($dispatcher->get('/foo', function () use ($test) {
+            return $test->getResponse();
+        }), $dispatcher);
         $response = $dispatcher->dispatch($request);
 
-        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+        $this->assertInstanceOf('Psr\Http\Message\\ResponseInterface', $response);
     }
 
     /**
@@ -115,18 +202,30 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
      */
     public function testAddRouteViaPost()
     {
-        $request = new Request(array(
-            'REQUEST_METHOD' => 'POST',
-            'REQUEST_URI' => '/foo'
-        ));
+        $uri = $this->getUri();
+
+        $uri->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/foo');
+
+        $request = $this->getRequest();
+        $request->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uri);
+
+        $request->expects($this->once())
+            ->method('getMethod')
+            ->willReturn('POST');
 
         $dispatcher = new Dispatcher();
-        $dispatcher->post('/foo', function () {
-            return new Response();
-        });
+
+        $test = $this;
+        $this->assertEquals($dispatcher->post('/foo', function () use ($test) {
+            return $test->getResponse();
+        }), $dispatcher);
         $response = $dispatcher->dispatch($request);
 
-        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
     }
 
     /**
@@ -134,18 +233,30 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
      */
     public function testAddRouteViaPut()
     {
-        $request = new Request(array(
-            'REQUEST_METHOD' => 'PUT',
-            'REQUEST_URI' => '/foo'
-        ));
+        $uri = $this->getUri();
+
+        $uri->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/foo');
+
+        $request = $this->getRequest();
+        $request->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uri);
+
+        $request->expects($this->once())
+            ->method('getMethod')
+            ->willReturn('PUT');
 
         $dispatcher = new Dispatcher();
-        $dispatcher->put('/foo', function () {
-            return new Response();
-        });
+
+        $test = $this;
+        $this->assertEquals($dispatcher->put('/foo', function () use ($test) {
+            return $test->getResponse();
+        }), $dispatcher);
         $response = $dispatcher->dispatch($request);
 
-        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
     }
 
     /**
@@ -153,18 +264,30 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
      */
     public function testAddRouteViaDelete()
     {
-        $request = new Request(array(
-            'REQUEST_METHOD' => 'DELETE',
-            'REQUEST_URI' => '/foo'
-        ));
+        $uri = $this->getUri();
+
+        $uri->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/foo');
+
+        $request = $this->getRequest();
+        $request->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uri);
+
+        $request->expects($this->once())
+            ->method('getMethod')
+            ->willReturn('DELETE');
 
         $dispatcher = new Dispatcher();
-        $dispatcher->delete('/foo', function () {
-            return new Response();
-        });
+
+        $test = $this;
+        $this->assertEquals($dispatcher->delete('/foo', function () use ($test) {
+            return $test->getResponse();
+        }), $dispatcher);
         $response = $dispatcher->dispatch($request);
 
-        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
     }
 
     /**
@@ -172,18 +295,30 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
      */
     public function testAddRouteViaHead()
     {
-        $request = new Request(array(
-            'REQUEST_METHOD' => 'HEAD',
-            'REQUEST_URI' => '/foo'
-        ));
+        $uri = $this->getUri();
+
+        $uri->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/foo');
+
+        $request = $this->getRequest();
+        $request->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uri);
+
+        $request->expects($this->once())
+            ->method('getMethod')
+            ->willReturn('HEAD');
 
         $dispatcher = new Dispatcher();
-        $dispatcher->head('/foo', function () {
-            return new Response();
-        });
+
+        $test = $this;
+        $this->assertEquals($dispatcher->head('/foo', function () use ($test) {
+            return $test->getResponse();
+        }), $dispatcher);
         $response = $dispatcher->dispatch($request);
 
-        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
     }
 
     /**
@@ -191,18 +326,30 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
      */
     public function testAddRouteViaOptions()
     {
-        $request = new Request(array(
-            'REQUEST_METHOD' => 'OPTIONS',
-            'REQUEST_URI' => '/foo'
-        ));
+        $uri = $this->getUri();
+
+        $uri->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/foo');
+
+        $request = $this->getRequest();
+        $request->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uri);
+
+        $request->expects($this->once())
+            ->method('getMethod')
+            ->willReturn('OPTIONS');
 
         $dispatcher = new Dispatcher();
-        $dispatcher->options('/foo', function () {
-            return new Response();
-        });
+
+        $test = $this;
+        $this->assertEquals($dispatcher->options('/foo', function () use ($test) {
+            return $test->getResponse();
+        }), $dispatcher);
         $response = $dispatcher->dispatch($request);
 
-        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
     }
 
     /**
@@ -210,18 +357,30 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
      */
     public function testAddRouteViaTrace()
     {
-        $request = new Request(array(
-            'REQUEST_METHOD' => 'TRACE',
-            'REQUEST_URI' => '/foo'
-        ));
+        $uri = $this->getUri();
+
+        $uri->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/foo');
+
+        $request = $this->getRequest();
+        $request->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uri);
+
+        $request->expects($this->once())
+            ->method('getMethod')
+            ->willReturn('TRACE');
 
         $dispatcher = new Dispatcher();
-        $dispatcher->trace('/foo', function () {
-            return new Response();
-        });
+
+        $test = $this;
+        $this->assertEquals($dispatcher->trace('/foo', function () use ($test) {
+            return $test->getResponse();
+        }), $dispatcher);
         $response = $dispatcher->dispatch($request);
 
-        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
     }
 
     /**
@@ -229,22 +388,43 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
      */
     public function testRequestHeaderMatch()
     {
-        $request = new Request(array(
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/foo',
-            'HTTP_HOST' => 'example.com'
-        ));
+        $uri = $this->getUri();
+
+        $uri->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/foo');
+
+        $request = $this->getRequest();
+
+        $request->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uri);
+
+        $request->expects($this->once())
+            ->method('getMethod')
+            ->willReturn('GET');
+
+        $request->expects($this->once())
+            ->method('hasHeader')
+            ->with('host')
+            ->willReturn(true);
+
+        $request->expects($this->once())
+            ->method('getHeaderLine')
+            ->with('host')
+            ->willReturn('example.com');
 
         $dispatcher = new Dispatcher();
 
+        $test = $this;
         $dispatcher->get(
-            '^/foo$',
-            function () { return new Response(); },
-            array('Host' => '^example.com$')
+            '/foo',
+            function () use ($test) { return $test->getResponse(); },
+            array('Host' => 'example.com')
         );
 
         $response = $dispatcher->dispatch($request);
-        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
     } 
 
     /**
@@ -252,31 +432,52 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
      */
     public function testActionArgumentInjection()
     {
-        $request = new Request(array(
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/foo',
-            'HTTP_HOST' => 'example.com'
-        ));
+        $uri = $this->getUri();
+
+        $uri->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/foo');
+
+        $request = $this->getRequest();
+
+        $request->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uri);
+
+        $request->expects($this->once())
+            ->method('getMethod')
+            ->willReturn('GET');
+
+        $request->expects($this->once())
+            ->method('hasHeader')
+            ->with('host')
+            ->willReturn(true);
+
+        $request->expects($this->once())
+            ->method('getHeaderLine')
+            ->with('host')
+            ->willReturn(implode(',', ['example.com']));
 
         $args = array();
-        $action = function (RequestInterface $request, $fromUri, $fromHostHeader) use (&$args) {
+        $test = $this;
+        $action = function (ServerRequestInterface $request, $fromUri, $fromHostHeader) use ($test, &$args) {
             $args['request'] = $request;
             $args['fromUri'] = $fromUri;
             $args['fromHostHeader'] = $fromHostHeader;
-            return new Response();
+            return $test->getResponse();
         };
 
         $dispatcher = new Dispatcher();
 
         $dispatcher->get(
-            '^/(?P<fromUri>foo)$',
+            '/{fromUri}',
             $action,
-            array('Host' => '^(?<fromHostHeader>example.com)$')
+            array('Host' => '^(?P<fromHostHeader>.*)$')
         );
 
         $response = $dispatcher->dispatch($request);
-
-        $this->assertInstanceOf('MattFerris\HttpRouting\RequestInterface', $args['request']);
+        $this->assertTrue(isset($args['request']));
+        $this->assertInstanceOf('Psr\Http\Message\ServerRequestInterface', $args['request']);
         $this->assertEquals($args['fromUri'], 'foo');
         $this->assertEquals($args['fromHostHeader'], 'example.com');
     }
@@ -286,18 +487,31 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
      */
     public function testFallThroughAction()
     {
-        $request = new Request(array(
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/foo'
-        ));
+        $uri = $this->getUri();
+
+        $uri->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/foo');
+
+        $request = $this->getRequest();
+
+        $request->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uri);
+
+        $request->expects($this->once())
+            ->method('getMethod')
+            ->willReturn('GET');
 
         $dispatcher = new Dispatcher();
+
+        $test = $this;
         $dispatcher
-            ->get('^/foo$', function () { /* do nothing */ })
-            ->get('^/foo$', function () { return new Response(); });
+            ->get('/foo', function () { /* do nothing */ })
+            ->get('/foo', function () use ($test) { return $test->getResponse(); });
 
         $response = $dispatcher->dispatch($request);
-        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
     }
 
     /**
@@ -305,22 +519,44 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
      */
     public function testInternalRedirect()
     {
-        $requestA = new Request(array(
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/foo'
-        ));
+        $uriA = $this->getUri();
 
-        $requestB = new Request(array(
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/bar'
-        ));
+        $uriA->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/foo');
+
+        $requestA = $this->getRequest();
+
+        $requestA->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uriA);
+
+        $requestA->expects($this->once())
+            ->method('getMethod')
+            ->willReturn('GET');
+
+        $uriB = $this->getUri();
+
+        $uriB->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/bar');
+
+        $requestB = $this->getRequest();
+
+        $requestB->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uriB);
+
+        $requestB->expects($this->once())
+            ->method('getMethod')
+            ->willReturn('GET');
 
         $dispatcher = new Dispatcher();
 
         $foo = false;
         $dispatcher
-            ->get('^/foo$', function () use ($requestB) { return $requestB; })
-            ->get('^/bar$', function () use (&$foo) { $foo = true; });
+            ->get('/foo', function () use ($requestB) { return $requestB; })
+            ->get('/bar', function () use (&$foo) { $foo = true; });
 
         $dispatcher->dispatch($requestA);
 
@@ -328,105 +564,59 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends testDispatch
+     * @depends testAddRouteViaRoute
      */
-    public function testBundleRegistration()
+    public function testGenerate()
     {
-        $bundle = $this->getMockBuilder('MattFerris\HttpRouting\BundleInterface')
-            ->setMethods(array('provides'))
-            ->getMock();
-
-        $bundle->expects($this->once())
-            ->method('provides')
-            ->will($this->returnValue(array(
-                array('method' => 'GET', 'uri' => 'foo', 'action' => function () {
-                    return new Response();
-                }),
-                array('method' => 'GET', 'uri' => 'bar', 'action' => array('DispatcherTest_Stub', 'stubAction'))
-            )));
-
-
-        $requestA = new Request(array(
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => 'foo'
-        ));
-
-        $requestB = new Request(array(
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => 'bar'
-        ));
-
         $dispatcher = new Dispatcher();
-        $dispatcher->register($bundle);
 
-        $response = $dispatcher->dispatch($requestA);
-        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+        // test retrieving reverse route
+        $dispatcher->get('/foo', function(){}, [], [], 'foo');
+        $this->assertEquals($dispatcher->generate('foo'), '/foo');
 
-        $response = $dispatcher->dispatch($requestB);
-        $this->assertInstanceOf('MattFerris\HttpRouting\ResponseInterface', $response);
+        // test reverse route with parameters
+        $dispatcher->get('/bar/{baz}', function(){}, [], [], 'bar');
+        $this->assertEquals($dispatcher->generate('bar', ['baz' => 'test']), '/bar/test');
     }
 
     /**
-     * @depends testBundleRegistration
-     * @expectedException MattFerris\HttpRouting\InvalidRouteCriteriaException
-     * @expectedExceptionMessage missing URI
+     * @depends testGenerate
      */
-    public function testBundleRegistrationMissingUri()
+    public function testAddDuplicateNamedRoute()
     {
-        $bundle = $this->getMockBuilder('MattFerris\HttpRouting\BundleInterface')
-            ->setMethods(array('provides'))
-            ->getMock();
-
-        $bundle->expects($this->once())
-            ->method('provides')
-            ->will($this->returnValue(array(
-                array('method' => 'GET', 'action' => function() {})
-            )));
-
         $dispatcher = new Dispatcher();
-        $dispatcher->register($bundle);
+
+        // test adding duplicate named route
+        $this->setExpectedException('MattFerris\Http\Routing\DuplicateNamedRouteException', 'named route "foo" already exists');
+        $dispatcher->get('/foo', function(){}, [], [], 'foo');
+        $dispatcher->get('/foo2', function(){}, [], [], 'foo');
     }
 
     /**
-     * @depends testBundleRegistration
-     * @expectedException MattFerris\HttpRouting\InvalidRouteCriteriaException
-     * @expectedExceptionMessage missing action
+     * @depends testGenerate
      */
-    public function testBundleRegistrationMissingAction()
+    public function testGenerateForNonExistentNameRoute()
     {
-        $bundle = $this->getMockBuilder('MattFerris\HttpRouting\BundleInterface')
-            ->setMethods(array('provides'))
-            ->getMock();
-
-        $bundle->expects($this->once())
-            ->method('provides')
-            ->will($this->returnValue(array(
-                array('method' => 'GET', 'uri' => 'foo')
-            )));
-
         $dispatcher = new Dispatcher();
-        $dispatcher->register($bundle);
+
+        // test getting non-existent named route
+        $this->setExpectedException('MattFerris\Http\Routing\NamedRouteDoesntExistException', 'named route "baz" doesn\'t exist');
+        $dispatcher->generate('baz');
     }
 
-    /**
-     * @depends testBundleRegistration
-     * @expectedException MattFerris\HttpRouting\InvalidRouteCriteriaException
-     * @expectedExceptionMessage headers must be an array
-     */
-    public function testBundleRegistrationBadHeaders()
+    public function testRegister()
     {
-        $bundle = $this->getMockBuilder('MattFerris\HttpRouting\BundleInterface')
-            ->setMethods(array('provides'))
+        $dispatcher = new Dispatcher();
+
+        $bundle = $this->getMockBuilder('MattFerris\Http\Routing\BundleInterface')
+            ->setMethods(['provides'])
             ->getMock();
 
         $bundle->expects($this->once())
             ->method('provides')
-            ->will($this->returnValue(array(
-                array('method' => 'GET', 'uri' => 'foo', 'action' => function(){}, 'headers' => 'foo')
-            )));
+            ->with($dispatcher);
 
-        $dispatcher = new Dispatcher();
-        $dispatcher->register($bundle);
+        $this->assertEquals($dispatcher->register($bundle), $dispatcher);
     }
 }
 
