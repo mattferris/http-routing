@@ -10,6 +10,11 @@ use Psr\Http\Message\ResponseInterface;
 
 class DispatcherTest extends PHPUnit_Framework_TestCase
 {
+    public function dummyAction()
+    {
+        return $this->getResponse();
+    }
+
     public function getUri()
     {
         return $this->getMockBuilder('Psr\Http\Message\UriInterface')
@@ -52,7 +57,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
             ->getMock();
     }
 
-    public function testDispatch()
+    public function testDispatchWithCallableAction()
     {
         $uri = $this->getUri();
         $uri->expects($this->once())
@@ -76,7 +81,30 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @testDispatch
+     * @testDispatchWithCallableAction
+     */
+    public function testDispatchWithStringAction()
+    {
+        $uri = $this->getUri();
+        $uri->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/foo');
+
+        $request = $this->getRequest();
+        $request->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uri);
+
+        $dispatcher = new Dispatcher();
+        $dispatcher->add(new SimpleRoute('/foo', 'DispatcherTest:dummyAction'));
+        //$dispatcher->add(new SimpleRoute('/foo', [$this, 'dummyAction']));
+
+        $response = $dispatcher->dispatch($request);
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
+    }
+
+    /**
+     * @testDispatchWithCallableAction
      */
     public function testAddRouteViaInsert()
     {
@@ -109,7 +137,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @testDispatch
+     * @testDispatchWithCallableAction
      */
     public function testAddRouteViaRoute()
     {
@@ -140,7 +168,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @testDispatch
+     * @testDispatchWithCallableAction
      */
     public function testAddRouteViaAny()
     {
@@ -167,7 +195,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @testDispatch
+     * @testDispatchWithCallableAction
      */
     public function testAddRouteViaGet()
     {
@@ -198,7 +226,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @testDispatch
+     * @testDispatchWithCallableAction
      */
     public function testAddRouteViaPost()
     {
@@ -229,7 +257,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @testDispatch
+     * @testDispatchWithCallableAction
      */
     public function testAddRouteViaPut()
     {
@@ -260,7 +288,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @testDispatch
+     * @testDispatchWithCallableAction
      */
     public function testAddRouteViaDelete()
     {
@@ -291,7 +319,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @testDispatch
+     * @testDispatchWithCallableAction
      */
     public function testAddRouteViaHead()
     {
@@ -322,7 +350,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @testDispatch
+     * @testDispatchWithCallableAction
      */
     public function testAddRouteViaOptions()
     {
@@ -353,7 +381,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @testDispatch
+     * @testDispatchWithCallableAction
      */
     public function testAddRouteViaTrace()
     {
@@ -384,7 +412,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends testDispatch
+     * @depends testDispatchWithCallableAction
      */
     public function testRequestHeaderMatch()
     {
@@ -483,7 +511,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends testDispatch
+     * @depends testDispatchWithCallableAction
      */
     public function testFallThroughAction()
     {
@@ -515,7 +543,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends testDispatch
+     * @depends testDispatchWithCallableAction
      */
     public function testInternalRedirect()
     {
@@ -620,10 +648,3 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     }
 }
 
-class DispatcherTest_Stub
-{
-    static public function stubAction()
-    {
-        return new Response();
-    }
-}

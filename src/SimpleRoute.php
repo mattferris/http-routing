@@ -38,15 +38,31 @@ class SimpleRoute implements RouteInterface
 
     /**
      * @param string $uri The URI pattern
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string $method The HTTP method
      * @param string[string] $headers Any HTTP headers to match
      * @throws \InvalidArgumentException If $uri or method is empty or non-string
      */
-    public function __construct($uri, callable $action, $method = null, array $headers = array())
+    public function __construct($uri, $action, $method = null, array $headers = array())
     {
         if (!is_string($uri) || empty($uri)) {
             throw new \InvalidArgumentException('$uri expects non-empty string');
+        }
+
+        /*
+         * Action can be callable or class:method, and in the case of the latter
+         * we need to check if it exists
+         */ 
+        if (is_string($action) && strpos($action, '::') === false) {
+            if (strpos($action, ':') === false) {
+                throw new \InvalidArgumentException('$action expects callable or "class:method"');
+            }
+            list($class, $methodName) = explode(':', $action);
+            if (!method_exists($class, $methodName)) {
+                throw new \InvalidArgumentException('$action doesn\'t exist');
+            }
+        } elseif (!is_callable($action)) {
+            throw new \InvalidArgumentException('$action expects callable or "class:method"');
         }
 
         if (!is_null($method) && (!is_string($method) || empty($method))) {

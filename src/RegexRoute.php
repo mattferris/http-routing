@@ -24,13 +24,13 @@ class RegexRoute extends SimpleRoute
     /**
      * @see SimpleRoute::__construct()
      * @param string $uri The URI pattern
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string $method The HTTP method
      * @param string[string] $headers Any HTTP headers to match
      * @param array[string] $defaults Default parameter values
      * @throws \InvalidArgumentException If $uri or $method is empty or non-string
      */
-    public function __construct($uri, callable $action, $method = null, array $headers = [], array $defaults = [])
+    public function __construct($uri, $action, $method = null, array $headers = [], array $defaults = [])
     {
         $this->defaults = $defaults;
         parent::__construct($uri, $action, $method, $headers);

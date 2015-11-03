@@ -11,6 +11,26 @@ class RegexRouteTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($route->hasHeaders());
     }
 
+    /**
+     * @depends testConstruct
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage $action expects callable or "class:method"
+     */
+    public function testConstructWithBadAction()
+    {
+        $route = new RegexRoute('/foo', 'foo');
+    }
+
+    /**
+     * @depends testConstruct
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage $action doesn't exist
+     */
+    public function testConstructWithNonExistentAction()
+    {
+        $route = new RegexRoute('/foo', 'Foo:bar');
+    }
+
     public function testMatchUri()
     {
         $route = new RegexRoute('/users/(?<user>[^/]+)/(?<action>[^/]+)', function () {});
