@@ -135,14 +135,14 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * Add a route by supplying all the parameters
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string $method The HTTP method to match
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function route($uri, callable $action, $method, array $headers, array $params = [], $name = null)
+    public function route($uri, $action, $method, array $headers, array $params = [], $name = null)
     {
         $class = $this->defaultRouteType;
         $this->add(new $class($uri, $action, $method, $headers, $params), $name);
@@ -153,13 +153,13 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * Add a route to match any HTTP method
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function any($uri, callable $action, array $headers = [], array $params = [], $name = null)
+    public function any($uri, $action, array $headers = [], array $params = [], $name = null)
     {
         return $this->route($uri, $action, null, $headers, $params, $name);
     }
@@ -168,13 +168,13 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * Add a route to match an HTTP GET request
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function get($uri, callable $action, array $headers = [], array $params = [], $name = null)
+    public function get($uri, $action, array $headers = [], array $params = [], $name = null)
     {
         return $this->route($uri, $action, 'GET', $headers, $params, $name);
     }
@@ -183,13 +183,13 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * Add a route to match an HTTP POST request
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function post($uri, callable $action, array $headers = [], array $params = [], $name = null)
+    public function post($uri, $action, array $headers = [], array $params = [], $name = null)
     {
         return $this->route($uri, $action, 'POST', $headers, $params, $name);
     }
@@ -198,13 +198,13 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * Add a route to match an HTTP PUT request
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function put($uri, callable $action, array $headers = [], array $params = [], $name = null)
+    public function put($uri, $action, array $headers = [], array $params = [], $name = null)
     {
         return $this->route($uri, $action, 'PUT', $headers, $params, $name);
     }
@@ -213,13 +213,13 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * Add a route to match an HTTP DELETE request
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function delete($uri, callable $action, array $headers = [], array $params = [], $name = null)
+    public function delete($uri, $action, array $headers = [], array $params = [], $name = null)
     {
         return $this->route($uri, $action, 'DELETE', $headers, $params, $name);
     }
@@ -228,13 +228,13 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * Add a route to match an HTTP HEAD request
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function head($uri, callable $action, array $headers = [], array $params = [], $name = null)
+    public function head($uri, $action, array $headers = [], array $params = [], $name = null)
     {
         return $this->route($uri, $action, 'HEAD', $headers, $params, $name);
     }
@@ -243,13 +243,13 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * Add a route to match an HTTP OPTIONS request
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function options($uri, callable $action, array $headers = [], array $params = [], $name = null)
+    public function options($uri, $action, array $headers = [], array $params = [], $name = null)
     {
         return $this->route($uri, $action, 'OPTIONS', $headers, $params, $name);
     }
@@ -258,13 +258,13 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      * Add a route to match an HTTP TRACE request
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function trace($uri, callable $action, array $headers = [], array $params = [], $name = null)
+    public function trace($uri, $action, array $headers = [], array $params = [], $name = null)
     {
         return $this->route($uri, $action, 'TRACE', $headers, $params, $name);
     }
@@ -355,20 +355,45 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
             $args['request'] = $request;
 
             $action = $route->getAction();
-            if ($action instanceof \Closure) {
-                $response = $this->di->injectFunction($action, $args);
-            } else {
-                if (is_string($action)) {
-                    $action = explode('::', $action);
+            if (is_callable($action)) {
+
+                if ($action instanceof \Closure) {
+
+                    // call closure
+                    $response = $this->di->injectFunction($action, $args);
+
+                } elseif (is_array($action)) {
+
+                    // call object->action
+                    $response = $this->di->injectMethod($action[0], $action[1], $args);
+
+                } else {
+
+                    // call static class::action
+                    list($class, $method) = explode('::', $action);
+                    $response = $this->di->injectStaticMethod($class, $method, $args);
+
+                }
+
+            } elseif (is_string($action) && strpos($action, ':') !== false) {
+
+                list($class, $method) = explode(':', $action);
+
+                if (!method_exists($class, $method)) {
+                    throw new \InvalidArgumentException('$action doesn\'t exist');
                 }
 
                 // check if we've already instantiated the object,
                 // if so, then use the existing object
-                $class = $action[0];
                 if (!isset($this->controllers[$class])) {
                     $this->controllers[$class] = $this->di->injectConstructor($class, array('di' => '%DI'));
                 }
-                $response = $this->di->injectMethod($this->controllers[$class], $action[1], $args);
+
+                // call object->action
+                $response = $this->di->injectMethod($this->controllers[$class], $method, $args);
+
+            } else {
+                throw new \InvalidArgumentException('$action expects callable or "class:method"');
             }
 
             DomainEvents::dispatch(new DispatchedRequestEvent($request, $route, $args));
