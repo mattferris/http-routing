@@ -36,7 +36,7 @@ class DispatchedRequestEvent extends AbstractRequestEvent
      *     request matched
      * @param array $args Any extra arguments passed to the event
      */
-    public function __construct(ServerRequestInterface $request, RouteInterface $route, array $args)
+    public function __construct(ServerRequestInterface $request, RouteInterface $route, array $args = [])
     {
         $this->route = $route;
         $this->args = $args;

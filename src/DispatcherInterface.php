@@ -42,110 +42,110 @@ interface DispatcherInterface
      * Add a route by supplying all the parameters
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string $method The HTTP method to match
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function route($uri, callable $action, $method, array $headers, array $params = [], $name = null);
+    public function route($uri, $action, $method, array $headers, array $params = [], $name = null);
 
     /**
      * Add a route to match any HTTP method
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function any($uri, callable $action, array $headers = [], array $params = [], $name = null);
+    public function any($uri, $action, array $headers = [], array $params = [], $name = null);
 
     /**
      * Add a route to match an HTTP GET request
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function get($uri, callable $action, array $headers = [], array $params = [], $name = null);
+    public function get($uri, $action, array $headers = [], array $params = [], $name = null);
 
     /**
      * Add a route to match an HTTP POST request
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function post($uri, callable $action, array $headers = [], array $params = [], $name = null);
+    public function post($uri, $action, array $headers = [], array $params = [], $name = null);
 
     /**
      * Add a route to match an HTTP PUT request
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function put($uri, callable $action, array $headers = [], array $params = [], $name = null);
+    public function put($uri, $action, array $headers = [], array $params = [], $name = null);
 
     /**
      * Add a route to match an HTTP DELETE request
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function delete($uri, callable $action, array $headers = [], array $params = [], $name = null);
+    public function delete($uri, $action, array $headers = [], array $params = [], $name = null);
 
     /**
      * Add a route to match an HTTP HEAD request
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function head($uri, callable $action, array $headers = [], array $params = [], $name = null);
+    public function head($uri, $action, array $headers = [], array $params = [], $name = null);
 
     /**
      * Add a route to match an HTTP OPTIONS request
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function options($uri, callable $action, array $headers = [], array $params = [], $name = null);
+    public function options($uri, $action, array $headers = [], array $params = [], $name = null);
 
     /**
      * Add a route to match an HTTP TRACE request
      *
      * @param string $uri The URI to match
-     * @param callable $action The action to dispatch the request to
+     * @param string|callable $action The action to dispatch the request to
      * @param string[string] $headers Any HTTP headers to match
      * @param string[string] $params Default values for parameters
      * @param string $name The name of the route to get the URI for
      * @return self
      */
-    public function trace($uri, callable $action, array $headers = [], array $params = [], $name = null);
+    public function trace($uri, $action, array $headers = [], array $params = [], $name = null);
 
     /**
      * Get a matching URI for a named route

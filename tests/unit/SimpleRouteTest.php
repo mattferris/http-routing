@@ -11,6 +11,26 @@ class SimpleRouteTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($route->hasHeaders());
     }
 
+    /**
+     * @depends testConstruct
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage $action expects callable or "class:method"
+     */
+    public function testConstructWithBadAction()
+    {
+        $route = new SimpleRoute('/foo', 'foo');
+    }
+
+    /**
+     * @depends testConstruct
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage $action doesn't exist
+     */
+    public function testConstructWithNonExistentAction()
+    {
+        $route = new SimpleRoute('/foo', 'Foo:bar');
+    }
+
     public function testMatchUri()
     {
         $route = new SimpleRoute('/users', function () {});
