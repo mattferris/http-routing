@@ -15,6 +15,7 @@
 namespace MattFerris\Http\Routing;
 
 use MattFerris\Events\AbstractLoggerHelpers;
+use MattFerris\Evetnts\LoggerInterface;
 
 class DomainEventLoggerHelpers extends AbstractLoggerHelpers
 {
