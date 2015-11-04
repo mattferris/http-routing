@@ -19,16 +19,29 @@ use MattFerris\Events\AbstractLoggerHelpers;
 class DomainEventLoggerHelpers extends AbstractLoggerHelpers
 {
     /**
+     * Register helpers with logger
+     *
+     * @param \MattFerris\Events\LoggerInterface $logger The logging dispatcher
+     */
+    public function register(LoggerInterface $logger)
+    {
+        $ns = __NAMESPACE__.'\\';
+        $logger
+            ->addHelper($ns.'DispatchedRequestEvent', [$this, 'onDispatchedRequestEvent'])
+            ->addHelper($ns.'ReceivedRequestEvent', [$this, 'onReceivedRequestEvent']);
+    }
+
+    /**
      * Generate a log message for DispatcheRequestEvent events
      *
      * @param \MattFerris\Http\Routing\DispatchedRequestEvent $event The dispatched event
      * @return string The generated log message
      */
-    static public function onDispatchedRequestEvent(DispatchedRequestEvent $event)
+    public function onDispatchedRequestEvent(DispatchedRequestEvent $event)
     {
         // make string for route
         $route = $event->getRoute();
-        $action = $route['action'];
+        $action = $route->getAction();
 
         if ($action instanceof \Closure) {
             $action = 'Closure';
@@ -44,6 +57,7 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
 
         // make string for args
         $eventArgs = $event->getArgs();
+
         $args = array();
         foreach ($eventArgs as $name => $value) {
             if (is_string($name)) {
@@ -55,8 +69,12 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
             }
         }
 
-        return 'dispatched request "'.$route['method'].' '.$event->getRequest()->getUri()
-            .'" to "'.$action.'" with arguments ('.implode(', ', $args).')';
+        $request = $event->getRequest();
+        $uri = (string)$event->getRequest()->getUri();
+        $method = $request->getMethod();
+
+        return 'dispatched request "'.$method.' '.$uri.'" to "'.$action.
+            '" with arguments ('.implode(', ', $args).')';
     }
 
     /**
@@ -65,7 +83,7 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
      * @param \MattFerris\Http\Routing\ReceivedRequestEvent $event The dispatched event
      * @return string The generated log message
      */
-    static public function onReceivedRequestEvent(ReceivedRequestEvent $event)
+    public function onReceivedRequestEvent(ReceivedRequestEvent $event)
     {
         $req = $event->getRequest();
         return 'received request "'.$req->getMethod().' '.$req->getUri().'"';
