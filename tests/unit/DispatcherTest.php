@@ -636,15 +636,15 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     {
         $dispatcher = new Dispatcher();
 
-        $bundle = $this->getMockBuilder('MattFerris\Http\Routing\BundleInterface')
+        $provider = $this->getMockBuilder('MattFerris\Provider\ProviderInterface')
             ->setMethods(['provides'])
             ->getMock();
 
-        $bundle->expects($this->once())
+        $provider->expects($this->once())
             ->method('provides')
             ->with($dispatcher);
 
-        $this->assertEquals($dispatcher->register($bundle), $dispatcher);
+        $this->assertEquals($dispatcher->register($provider), $dispatcher);
     }
 }
 
