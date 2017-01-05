@@ -8,8 +8,8 @@
         }
     },
     "require": {
-        "mattferris/di": "dev-develop",
-        "mattferris/events": "dev-develop",
+        "mattferris/di": "~0.4",
+        "mattferris/events": "~0.4",
         "mattferris/provider": "~0.3",
         "psr/http-message": "^1.0"
     },
