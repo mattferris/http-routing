@@ -38,7 +38,7 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
      * @param \MattFerris\Http\Routing\DispatchedRequestEvent $event The dispatched event
      * @return string The generated log message
      */
-    public function onDispatchedRequestEvent(DispatchedRequestEvent $event)
+    static public function onDispatchedRequestEvent(DispatchedRequestEvent $event)
     {
         // make string for route
         $route = $event->getRoute();
@@ -84,7 +84,7 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
      * @param \MattFerris\Http\Routing\ReceivedRequestEvent $event The dispatched event
      * @return string The generated log message
      */
-    public function onReceivedRequestEvent(ReceivedRequestEvent $event)
+    static public function onReceivedRequestEvent(ReceivedRequestEvent $event)
     {
         $req = $event->getRequest();
         return 'received request "'.$req->getMethod().' '.$req->getUri().'"';
