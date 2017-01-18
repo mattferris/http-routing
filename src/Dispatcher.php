@@ -370,27 +370,27 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
                 } else {
 
                     // call static class::action
-                    list($class, $method) = explode('::', $action);
-                    $response = $this->di->injectStaticMethod($class, $method, $args);
+                    list($actionClass, $actionMethod) = explode('::', $action);
+                    $response = $this->di->injectStaticMethod($actionClass, $actionMethod, $args);
 
                 }
 
             } elseif (is_string($action) && strpos($action, ':') !== false) {
 
-                list($class, $method) = explode(':', $action);
+                list($actionClass, $actionMethod) = explode(':', $action);
 
-                if (!method_exists($class, $method)) {
+                if (!method_exists($actionClass, $actionMethod)) {
                     throw new \InvalidArgumentException('$action doesn\'t exist');
                 }
 
                 // check if we've already instantiated the object,
                 // if so, then use the existing object
-                if (!isset($this->controllers[$class])) {
-                    $this->controllers[$class] = $this->di->injectConstructor($class, array('di' => '%DI'));
+                if (!isset($this->controllers[$actionClass])) {
+                    $this->controllers[$actionClass] = $this->di->injectConstructor($actionClass, array('di' => '%DI'));
                 }
 
                 // call object->action
-                $response = $this->di->injectMethod($this->controllers[$class], $method, $args);
+                $response = $this->di->injectMethod($this->controllers[$actionClass], $actionMethod, $args);
 
             } else {
                 throw new \InvalidArgumentException('$action expects callable or "class:method"');
@@ -401,8 +401,8 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
             // if we get a request returned, dispatch it
             if ($response instanceof ServerRequestInterface) {
                 $request = $response;
-                $method = $request->getMethod();
                 $path = $request->getUri()->getPath();
+                $method = $request->getMethod();
                 $i = 0;
                 $response = null;
             } elseif ($response instanceof ResponseInterface) {

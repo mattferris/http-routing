@@ -15,6 +15,10 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         return $this->getResponse();
     }
 
+    public function nullResponseAction()
+    {
+    }
+
     public function getUri()
     {
         return $this->getMockBuilder('Psr\Http\Message\UriInterface')
@@ -535,6 +539,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         $test = $this;
         $dispatcher
+            ->get('/foo', 'DispatcherTest:nullResponseAction')
             ->get('/foo', function () { /* do nothing */ })
             ->get('/foo', function () use ($test) { return $test->getResponse(); });
 
