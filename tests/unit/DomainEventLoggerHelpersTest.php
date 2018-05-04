@@ -34,8 +34,9 @@ class DomainEventLoggerHelpersTest extends PHPUnit_Framework_TestCase
 
         $helpers = new DomainEventLoggerHelpers();
 
-        $msg = $helpers->onDispatchedRequestEvent(new DispatchedRequestEvent($request, $route));
-        $this->assertEquals($msg, 'dispatched request "GET /foo" to "Controller:action" with arguments ()');
+        $args = ['foo' => 'bar', 'baz' => new stdClass, 'bif' => []];
+        $msg = $helpers->onDispatchedRequestEvent(new DispatchedRequestEvent($request, $route, $args));
+        $this->assertEquals($msg, 'dispatched request "GET /foo" to "Controller:action" with arguments (foo="bar", baz=[stdClass], bif=[Array])');
     }
 
     public function testOnReceivedRequestEvent()

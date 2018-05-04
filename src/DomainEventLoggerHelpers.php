@@ -64,6 +64,8 @@ class DomainEventLoggerHelpers extends AbstractLoggerHelpers
             if (is_string($name)) {
                 if (is_object($value)) {
                     $args[] = $name.'=['.get_class($value).']';
+                } elseif (is_array($value)) {
+                    $args[] = $name.'=[Array]';
                 } else {
                     $args[] = $name.'="'.addslashes($value).'"';
                 }
