@@ -402,8 +402,8 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
             if ($response instanceof ServerRequestInterface) {
 
                 if ($response->getUri() != $request->getUri()
-                    && $response->getMethod() != $request->getMethod()
-                    && $response->getHeaders() != $request->getHeaders()) {
+                    || $response->getMethod() != $request->getMethod()
+                    || $response->getHeaders() != $request->getHeaders()) {
                     $path = $response->getUri()->getPath();
                     $method = $response->getMethod();
                     $i = 0;

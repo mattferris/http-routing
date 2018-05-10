@@ -1,4 +1,4 @@
-t?php
+<?php
 
 use MattFerris\Http\Routing\DomainEvent;
 use MattFerris\Http\Routing\DomainEvents;
@@ -568,10 +568,6 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
             ->method('getMethod')
             ->willReturn('GET');
 
-        $requestA->expects($this->once())
-            ->method('getHeaders')
-            ->willReturn(['Host' => 'example.com']);
-
         $uriB = $this->getUri();
 
         $uriB->expects($this->once())
@@ -606,19 +602,23 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
     public function testNonRedirectRequestResponse()
     {
         $uri = $this->getUri();
-        $uri->expects($this->exactly(2))
+        $uri->expects($this->once())
             ->method('getPath')
             ->willReturn('/foo');
 
         $requestA = $this->getRequest();
 
-        $requestA->expects($this->once())
+        $requestA->expects($this->exactly(2))
             ->method('getUri')
             ->willReturn($uri);
 
-        $requestA->expects($this->once())
+        $requestA->expects($this->exactly(2))
             ->method('getMethod')
             ->willReturn('GET');
+
+        $requestA->expects($this->once())
+            ->method('getHeaders')
+            ->willReturn(['Host' => 'example.com']);
 
         $requestB = $this->getRequest();
 
@@ -630,6 +630,10 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
             ->method('getMethod')
             ->willReturn('GET');
 
+        $requestB->expects($this->once())
+            ->method('getHeaders')
+            ->willReturn(['Host' => 'example.com']);
+
         $dispatcher = new Dispatcher();
 
         $foo = null;
@@ -637,7 +641,9 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
             ->get('/foo', function () use ($requestB) { return $requestB; })
             ->get('/foo', function ($request) use (&$foo) { $foo = $request; });
 
-        $this->assertSame($foo, $requestB);
+        $dispatcher->dispatch($requestA);
+
+        $this->assertSame($requestB, $foo);
     }
 
     /**
