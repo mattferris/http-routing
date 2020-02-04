@@ -118,7 +118,7 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      */
     public function insert(RouteInterface $route, $position, $name = null)
     {
-        if (!is_int($position) || $position < 0 || $position > count($position)) {
+        if (!is_int($position) || $position < 0 || $position > count($this->routes)) {
             throw new \InvalidArgumentException('$position out of range');
         }
 
@@ -400,11 +400,18 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
 
             // if we get a request returned, dispatch it
             if ($response instanceof ServerRequestInterface) {
+
+                if ($response->getUri() != $request->getUri()
+                    || $response->getMethod() != $request->getMethod()
+                    || $response->getHeaders() != $request->getHeaders()) {
+                    $path = $response->getUri()->getPath();
+                    $method = $response->getMethod();
+                    $i = 0;
+                }
+
                 $request = $response;
-                $path = $request->getUri()->getPath();
-                $method = $request->getMethod();
-                $i = 0;
                 $response = null;
+
             } elseif ($response instanceof ResponseInterface) {
                 break;
             }

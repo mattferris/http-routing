@@ -560,7 +560,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         $requestA = $this->getRequest();
 
-        $requestA->expects($this->once())
+        $requestA->expects($this->exactly(2))
             ->method('getUri')
             ->willReturn($uriA);
 
@@ -576,7 +576,7 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
 
         $requestB = $this->getRequest();
 
-        $requestB->expects($this->once())
+        $requestB->expects($this->exactly(2))
             ->method('getUri')
             ->willReturn($uriB);
 
@@ -594,6 +594,56 @@ class DispatcherTest extends PHPUnit_Framework_TestCase
         $dispatcher->dispatch($requestA);
 
         $this->assertTrue($foo);
+    }
+
+    /**
+     * @depends testInternalRedirect
+     */
+    public function testNonRedirectRequestResponse()
+    {
+        $uri = $this->getUri();
+        $uri->expects($this->once())
+            ->method('getPath')
+            ->willReturn('/foo');
+
+        $requestA = $this->getRequest();
+
+        $requestA->expects($this->exactly(2))
+            ->method('getUri')
+            ->willReturn($uri);
+
+        $requestA->expects($this->exactly(2))
+            ->method('getMethod')
+            ->willReturn('GET');
+
+        $requestA->expects($this->once())
+            ->method('getHeaders')
+            ->willReturn(['Host' => 'example.com']);
+
+        $requestB = $this->getRequest();
+
+        $requestB->expects($this->once())
+            ->method('getUri')
+            ->willReturn($uri);
+
+        $requestB->expects($this->once())
+            ->method('getMethod')
+            ->willReturn('GET');
+
+        $requestB->expects($this->once())
+            ->method('getHeaders')
+            ->willReturn(['Host' => 'example.com']);
+
+        $dispatcher = new Dispatcher();
+
+        $foo = null;
+        $dispatcher
+            ->get('/foo', function () use ($requestB) { return $requestB; })
+            ->get('/foo', function ($request) use (&$foo) { $foo = $request; });
+
+        $dispatcher->dispatch($requestA);
+
+        $this->assertSame($requestB, $foo);
     }
 
     /**
