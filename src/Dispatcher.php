@@ -118,7 +118,7 @@ class Dispatcher implements DispatcherInterface, ConsumerInterface
      */
     public function insert(RouteInterface $route, $position, $name = null)
     {
-        if (!is_int($position) || $position < 0 || $position > count($position)) {
+        if (!is_int($position) || $position < 0 || $position > count($this->routes)) {
             throw new \InvalidArgumentException('$position out of range');
         }
 
